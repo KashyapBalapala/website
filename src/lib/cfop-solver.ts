@@ -37,31 +37,31 @@ function toFacelets(state: CubeState): string {
       {x:-1,y:1,z:0},  {x:0,y:1,z:0},  {x:1,y:1,z:0},
       {x:-1,y:1,z:1},  {x:0,y:1,z:1},  {x:1,y:1,z:1}
     ],
-    // R face: looking at right side (x=1), scan from top-back to bottom-front
+    // R face: looking from +x; +z (F) is screen-left → scan z from +1 to -1
     R: [
-      {x:1,y:1,z:-1}, {x:1,y:1,z:0}, {x:1,y:1,z:1},
-      {x:1,y:0,z:-1}, {x:1,y:0,z:0}, {x:1,y:0,z:1},
-      {x:1,y:-1,z:-1}, {x:1,y:-1,z:0}, {x:1,y:-1,z:1}
+      {x:1,y:1,z:1}, {x:1,y:1,z:0}, {x:1,y:1,z:-1},
+      {x:1,y:0,z:1}, {x:1,y:0,z:0}, {x:1,y:0,z:-1},
+      {x:1,y:-1,z:1}, {x:1,y:-1,z:0}, {x:1,y:-1,z:-1}
     ],
-    // F face: looking at front (z=1), scan from top-left to bottom-right
+    // F face: looking from +z; +x (R) is screen-right
     F: [
       {x:-1,y:1,z:1}, {x:0,y:1,z:1}, {x:1,y:1,z:1},
       {x:-1,y:0,z:1}, {x:0,y:0,z:1}, {x:1,y:0,z:1},
       {x:-1,y:-1,z:1}, {x:0,y:-1,z:1}, {x:1,y:-1,z:1}
     ],
-    // D face: looking up at bottom (y=-1), scan from front-left to back-right
+    // D face: looking from -y; +z (F) is screen-top
     D: [
       {x:-1,y:-1,z:1}, {x:0,y:-1,z:1}, {x:1,y:-1,z:1},
       {x:-1,y:-1,z:0}, {x:0,y:-1,z:0}, {x:1,y:-1,z:0},
       {x:-1,y:-1,z:-1}, {x:0,y:-1,z:-1}, {x:1,y:-1,z:-1}
     ],
-    // L face: looking at left side (x=-1), scan from top-front to bottom-back  
+    // L face: looking from -x; +z (F) is screen-right → scan z from -1 to +1
     L: [
-      {x:-1,y:1,z:1}, {x:-1,y:1,z:0}, {x:-1,y:1,z:-1},
-      {x:-1,y:0,z:1}, {x:-1,y:0,z:0}, {x:-1,y:0,z:-1},
-      {x:-1,y:-1,z:1}, {x:-1,y:-1,z:0}, {x:-1,y:-1,z:-1}
+      {x:-1,y:1,z:-1}, {x:-1,y:1,z:0}, {x:-1,y:1,z:1},
+      {x:-1,y:0,z:-1}, {x:-1,y:0,z:0}, {x:-1,y:0,z:1},
+      {x:-1,y:-1,z:-1}, {x:-1,y:-1,z:0}, {x:-1,y:-1,z:1}
     ],
-    // B face: looking at back (z=-1), scan from top-right to bottom-left
+    // B face: looking from -z; +x (R) is screen-left → scan x from +1 to -1
     B: [
       {x:1,y:1,z:-1}, {x:0,y:1,z:-1}, {x:-1,y:1,z:-1},
       {x:1,y:0,z:-1}, {x:0,y:0,z:-1}, {x:-1,y:0,z:-1},
@@ -75,8 +75,10 @@ function toFacelets(state: CubeState): string {
     for (const coord of coords) {
       const cubie = state.cubies.find(c => c.pos.x === coord.x && c.pos.y === coord.y && c.pos.z === coord.z);
       const color = cubie?.faceColors[face];
-      const letter = color ? (colorToLetter[color] || face) : face;
-      result += letter;
+      if (!color) {
+        throw new Error(`Missing ${face} sticker at (${coord.x},${coord.y},${coord.z})`);
+      }
+      result += colorToLetter[color];
     }
   }
   
@@ -232,15 +234,23 @@ export function planCFOP(initial: CubeState): CFOPPlan {
   
   // Import vendored cubejs solver
   // @ts-ignore
-  const solveJs = require('./thirdparty/cubejs-solve.js');
-  // @ts-ignore  
-  const cubeJs = require('./thirdparty/cubejs-cube.js');
-  const solver: any = (solveJs && (solveJs as any).solve) ? solveJs : (globalThis as any).cubejs || solveJs;
-  const solutionStr: string = (solver.solve ? solver.solve : solver)(facelets);
-  
-  console.log(`🔧 Solver input: ${facelets}`);
-  console.log(`🔧 Solver output: ${solutionStr}`);
-  
+  const Cube = require('./thirdparty/cubejs-cube.js');
+  // @ts-ignore — attaches Cube.initSolver / Cube.prototype.solve
+  require('./thirdparty/cubejs-solve.js');
+
+  if (typeof Cube.initSolver === 'function' && !(Cube as any).__solverReady) {
+    Cube.initSolver();
+    (Cube as any).__solverReady = true;
+  }
+
+  const cube = Cube.fromString(facelets);
+  const solutionStr: string = cube.solve() || '';
+
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    console.log(`🔧 Solver input: ${facelets}`);
+    console.log(`🔧 Solver output: ${solutionStr}`);
+  }
+
   const allMoves = fromSolutionString(solutionStr);
 
   // Simulate and segment

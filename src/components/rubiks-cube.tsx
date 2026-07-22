@@ -4,36 +4,16 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { OrbitControls, ContactShadows } from '@react-three/drei';
-import { createSolvedCubies, type CubieData, type FaceKey, type Color } from '../lib/cube-core';
-// @ts-ignore — vendored CommonJS cubejs
-import Cube from '../lib/thirdparty/cubejs-cube';
-// @ts-ignore — attaches Cube.initSolver / Cube.prototype.solve
-import '../lib/thirdparty/cubejs-solve';
+import { createSolvedCubies, createSolvedState, applyMoves, type CubieData, type FaceKey, type Color } from '../lib/cube-core';
+import { planCFOP, type Stage } from '../lib/cfop-solver';
 
 const ANIMATION_SPEED_MS = 280;
-
-let solverReady = false;
-function ensureSolver() {
-  if (!solverReady) {
-    Cube.initSolver();
-    solverReady = true;
-  }
-}
-
-function solveFromHistory(history: string[]): string[] {
-  ensureSolver();
-  const cube = new Cube();
-  history.forEach((m) => cube.move(m));
-  const sol = cube.solve();
-  if (!sol || !sol.trim()) return [];
-  return sol.trim().split(/\s+/);
-}
 
 const COLOR_MAP: Record<Color, string> = {
   'W': '#ffffff',
   'Y': '#ffd500',
-  'O': '#ff5800',
-  'R': '#b90000',
+  'O': '#ff8c00', // distinct orange (was #ff5800, read as red next to R)
+  'R': '#c41e3a',
   'G': '#009e60',
   'B': '#0045ad',
 };
@@ -75,15 +55,21 @@ const Sticker = ({ face, color }: { face: FaceKey; color: string }) => {
       case 'D': return { pos: [0, -o, 0] as [number,number,number], rot: [Math.PI / 2, 0, 0]  as [number,number,number] };
       case 'F': return { pos: [0, 0, o]  as [number,number,number], rot: [0, 0, 0]             as [number,number,number] };
       case 'B': return { pos: [0, 0, -o] as [number,number,number], rot: [0, Math.PI, 0]       as [number,number,number] };
-      case 'R': return { pos: [o, 0, 0]  as [number,number,number], rot: [0, -Math.PI / 2, 0]  as [number,number,number] };
-      case 'L': return { pos: [-o, 0, 0] as [number,number,number], rot: [0, Math.PI / 2, 0]   as [number,number,number] };
+      case 'R': return { pos: [o, 0, 0]  as [number,number,number], rot: [0, Math.PI / 2, 0]   as [number,number,number] };
+      case 'L': return { pos: [-o, 0, 0] as [number,number,number], rot: [0, -Math.PI / 2, 0]  as [number,number,number] };
     }
   }, [face]);
 
   return (
     <mesh position={pos} rotation={rot}>
       <planeGeometry args={[0.82, 0.82]} />
-      <meshStandardMaterial color={color} roughness={0.15} metalness={0.05} />
+      <meshStandardMaterial
+        color={color}
+        roughness={0.35}
+        metalness={0}
+        emissive={color}
+        emissiveIntensity={0.12}
+      />
     </mesh>
   );
 };
@@ -242,6 +228,8 @@ export default function RubiksCube() {
 
   const [justSolved, setJustSolved] = useState(false);
   const [key, setKey] = useState(0); // used to remount CubeScene on reset
+  const [solveStages, setSolveStages] = useState<Stage[]>([]);
+  const [stageIndex, setStageIndex] = useState(0);
 
   // Keep refs in sync with state
   const syncQueue = (q: string[]) => {
@@ -260,6 +248,8 @@ export default function RubiksCube() {
   const handleScramble = () => {
     if (queueRef.current.length > 0) return; // don't pile on
     setJustSolved(false);
+    setSolveStages([]);
+    setStageIndex(0);
 
     const faces = ['U', 'D', 'L', 'R', 'F', 'B'];
     const moves: string[] = [];
@@ -283,12 +273,26 @@ export default function RubiksCube() {
     if (isSolvingRef.current || queueRef.current.length > 0) return;
     if (historyRef.current.length === 0) return;
 
-    const solution = solveFromHistory(historyRef.current);
-    if (solution.length === 0) return;
+    const state = applyMoves(createSolvedState(), historyRef.current);
+    const plan = planCFOP(state);
+    if (!plan.moves.length) return;
 
-    const newHistory = [...historyRef.current, ...solution];
+    // One stage label per queued move (from CFOP segmentation)
+    const stages: Stage[] = [];
+    for (const sp of plan.stages) {
+      for (const step of sp.steps) {
+        for (let i = 0; i < step.alg.length; i++) stages.push(sp.stage);
+      }
+    }
+    while (stages.length < plan.moves.length) {
+      stages.push(stages[stages.length - 1] ?? 'PLL');
+    }
+
+    const newHistory = [...historyRef.current, ...plan.moves];
     syncHistory(newHistory);
-    syncQueue(solution);
+    setSolveStages(stages);
+    setStageIndex(0);
+    syncQueue(plan.moves);
     syncSolving(true);
   };
 
@@ -298,10 +302,14 @@ export default function RubiksCube() {
       const next = prev.slice(1);
       queueRef.current = next;
 
+      setStageIndex(i => i + 1);
+
       if (next.length === 0 && isSolvingRef.current) {
         isSolvingRef.current = false;
         setIsSolving(false);
         setJustSolved(true);
+        setSolveStages([]);
+        setStageIndex(0);
         setTimeout(() => setJustSolved(false), 2600);
       }
 
@@ -314,11 +322,16 @@ export default function RubiksCube() {
     syncHistory([]);
     syncSolving(false);
     setJustSolved(false);
+    setSolveStages([]);
+    setStageIndex(0);
     // Remount the Canvas/CubeScene to get a fresh solved cube
     setKey(k => k + 1);
   };
 
   const isIdle = queue.length === 0 && !isSolving;
+  const currentStage = isSolving && solveStages.length > 0
+    ? solveStages[Math.min(stageIndex, solveStages.length - 1)]
+    : null;
 
   return (
     <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4">
@@ -355,10 +368,17 @@ export default function RubiksCube() {
           </div>
         )}
 
-        {/* Current move indicator */}
+        {/* Current move / CFOP stage indicator */}
         {queue.length > 0 && (
-          <div className="absolute top-4 right-4 bg-[#8eb1c2]/90 text-white px-4 py-1.5 rounded-full font-mono font-bold text-lg">
-            {queue[0]}
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            {currentStage && (
+              <div className="bg-white/90 text-[#5f8697] px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide">
+                {currentStage}
+              </div>
+            )}
+            <div className="bg-[#8eb1c2]/90 text-white px-4 py-1.5 rounded-full font-mono font-bold text-lg">
+              {queue[0]}
+            </div>
           </div>
         )}
 
@@ -398,8 +418,8 @@ export default function RubiksCube() {
       <div className="mt-4 w-full p-4 bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-xl border border-white/40 dark:border-white/10">
         <p className="text-xs text-muted-foreground mb-2 font-semibold">
           {queue.length === 0
-            ? 'Drag to orbit · Scramble to mix · Solve to animate a solution · Reset to start over'
-            : `${queue.length} move${queue.length !== 1 ? 's' : ''} remaining`}
+            ? 'Drag to orbit · Scramble to mix · Solve runs CFOP-staged cubejs · Reset to start over'
+            : `${queue.length} move${queue.length !== 1 ? 's' : ''} remaining${currentStage ? ` · ${currentStage}` : ''}`}
         </p>
         <div className="flex flex-wrap gap-1.5 font-mono text-xs max-h-24 overflow-y-auto">
           {queue.length === 0 ? (

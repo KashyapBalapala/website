@@ -93,16 +93,17 @@ function rotateFaceKeysAroundX(keys: Partial<Record<FaceKey, Color>>, dir: 1|-1)
   const out: Partial<Record<FaceKey, Color>> = {};
   if (keys.R) out.R = keys.R;
   if (keys.L) out.L = keys.L;
+  // Must match rotatePosAroundX: dir=1 sends U→F→D→B→U
   if (dir === 1) {
-    if (keys.U) out.B = keys.U;
-    if (keys.B) out.D = keys.B;
-    if (keys.D) out.F = keys.D;
-    if (keys.F) out.U = keys.F;
-  } else {
     if (keys.U) out.F = keys.U;
     if (keys.F) out.D = keys.F;
     if (keys.D) out.B = keys.D;
     if (keys.B) out.U = keys.B;
+  } else {
+    if (keys.U) out.B = keys.U;
+    if (keys.B) out.D = keys.B;
+    if (keys.D) out.F = keys.D;
+    if (keys.F) out.U = keys.F;
   }
   return out;
 }
@@ -129,16 +130,17 @@ function rotateFaceKeysAroundZ(keys: Partial<Record<FaceKey, Color>>, dir: 1|-1)
   const out: Partial<Record<FaceKey, Color>> = {};
   if (keys.F) out.F = keys.F;
   if (keys.B) out.B = keys.B;
+  // Must match rotatePosAroundZ: dir=1 sends R→U→L→D→R
   if (dir === 1) {
+    if (keys.R) out.U = keys.R;
+    if (keys.U) out.L = keys.U;
+    if (keys.L) out.D = keys.L;
+    if (keys.D) out.R = keys.D;
+  } else {
     if (keys.U) out.R = keys.U;
     if (keys.R) out.D = keys.R;
     if (keys.D) out.L = keys.D;
     if (keys.L) out.U = keys.L;
-  } else {
-    if (keys.U) out.L = keys.U;
-    if (keys.L) out.D = keys.L;
-    if (keys.D) out.R = keys.D;
-    if (keys.R) out.U = keys.R;
   }
   return out;
 }
@@ -168,7 +170,8 @@ export function applyMove(state: CubeState, move: string): CubeState {
     const face = token as FaceKey;
     axis = (face === 'U' || face === 'D') ? 'y' : (face === 'L' || face === 'R') ? 'x' : 'z';
     layer = (face === 'U' || face === 'R' || face === 'F') ? 1 : -1;
-    const baseDir: 1|-1 = (face === 'R' || face === 'U' || face === 'F') ? 1 : -1;
+    // Match cubejs / Singmaster clockwise: R,U,F are CW with negative axis dir in our coords
+    const baseDir: 1|-1 = (face === 'R' || face === 'U' || face === 'F') ? -1 : 1;
     dir = (isPrime ? -baseDir : baseDir) as 1|-1;
   }
   
