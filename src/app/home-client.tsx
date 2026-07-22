@@ -433,7 +433,7 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
       {/* Language-learning joke section */}
       <section id="duolingo">
         <GlassCard className="min-h-[50vh] flex flex-col items-center justify-center">
-          <div className="text-6xl mb-6 animate-bounce">🦉</div>
+          <div className="text-8xl md:text-9xl mb-6 animate-bounce">🦉</div>
           <h2 className="text-3xl md:text-5xl font-bold mb-3 text-center" style={{ color: "#6f97a8" }}>
             Sanskrit or vanish?
           </h2>
