@@ -184,17 +184,26 @@ export function HomeGraph({ posts = [] }: HomeGraphProps) {
   }, []);
 
   useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
     const updateDimensions = () => {
-      if (containerRef.current) {
-        const width = containerRef.current.clientWidth;
-        setDimensions({ width, height: Math.min(500, width * 0.6) });
-      }
+      // Sidebar overlays the left; graph area is the remaining width
+      const raw = el.clientWidth;
+      const width = raw - (sidebarOpen ? 192 : 0);
+      // Ignore pre-layout / collapsed measurements so the card doesn't squash
+      if (width < 160) return;
+      setDimensions({
+        width,
+        height: Math.min(500, Math.max(300, Math.round(width * 0.55))),
+      });
     };
 
     updateDimensions();
-    window.addEventListener("resize", updateDimensions);
-    return () => window.removeEventListener("resize", updateDimensions);
-  }, []);
+    const observer = new ResizeObserver(updateDimensions);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [sidebarOpen]);
 
   const router = useRouter();
 
@@ -505,7 +514,8 @@ export function HomeGraph({ posts = [] }: HomeGraphProps) {
   return (
     <div
       ref={containerRef}
-      className="relative w-full mb-12 rounded-xl border border-border/50 bg-gradient-to-br from-violet-50/50 via-background to-purple-50/30 dark:from-violet-950/20 dark:via-background dark:to-purple-950/10 overflow-hidden"
+      className="relative w-full min-h-[300px] mb-12 rounded-xl border border-border/50 bg-gradient-to-br from-violet-50/50 via-background to-purple-50/30 dark:from-violet-950/20 dark:via-background dark:to-purple-950/10 overflow-hidden"
+      style={{ minHeight: dimensions.height }}
     >
       <div 
         className="absolute inset-0 opacity-[0.03] dark:opacity-[0.02]"
@@ -539,12 +549,13 @@ export function HomeGraph({ posts = [] }: HomeGraphProps) {
         </button>
       )}
       
+      {/* Outer clips width; inner keeps fixed w-48 so content never squashes mid-transition */}
       <div
-        className={`absolute left-0 top-0 bottom-0 z-20 transition-all duration-300 ease-in-out ${
+        className={`absolute left-0 top-0 bottom-0 z-20 overflow-hidden transition-[width,opacity] duration-300 ease-in-out ${
           sidebarOpen ? "w-48 opacity-100" : "w-0 opacity-0 pointer-events-none"
         }`}
       >
-        <div className="h-full bg-background/90 backdrop-blur-sm border-r border-border/50 overflow-hidden">
+        <div className="h-full w-48 bg-background/90 backdrop-blur-sm border-r border-border/50">
           <div className="p-3 pt-12 h-full overflow-y-auto">
             <h3 className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">
               Sections
@@ -623,13 +634,16 @@ export function HomeGraph({ posts = [] }: HomeGraphProps) {
         </div>
       </div>
       
-      <svg
-        ref={svgRef}
-        className={`w-full relative z-10 transition-all duration-300 ${
-          sidebarOpen ? "pl-48" : ""
-        }`}
-        style={{ minHeight: "300px" }}
-      />
+      <div
+        className="relative z-10 transition-[padding] duration-300 ease-in-out"
+        style={{ paddingLeft: sidebarOpen ? "12rem" : 0 }}
+      >
+        <svg
+          ref={svgRef}
+          className="w-full block"
+          style={{ height: dimensions.height, minHeight: 300 }}
+        />
+      </div>
 
       {hoveredNode && (
         <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-xs bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-lg p-3 pointer-events-none z-20">

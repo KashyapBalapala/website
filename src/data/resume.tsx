@@ -20,11 +20,11 @@ export const DATA = {
   ],
   contact: {
     email: "your.email@example.com",
-    tel: "+91-XXXXX-XXXXX",
+    tel: "+91-76748-40191",
     social: {
       GitHub: {
         name: "GitHub",
-        url: "https://github.com/yourusername",
+        url: "https://github.com/KashyapBalapala",
         icon: Icons.github,
         navbar: true,
       },
