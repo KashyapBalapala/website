@@ -54,14 +54,14 @@ export const Values = ({ delay = 0 }: ValuesProps) => {
             transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
             className="overflow-hidden"
           >
-            <div className="space-y-content-sm max-w-lg mx-auto">
-              <p className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert">
+            <div className="space-y-content-sm pt-2">
+              <p className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert leading-relaxed">
                 Dummy placeholder text. This is a good spot for a short statement
                 about how you approach your work — code quality, integrity,
                 collaboration, whatever actually matters to you. Replace this
                 paragraph with your own real words.
               </p>
-              <p className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert">
+              <p className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert leading-relaxed">
                 Unlike the other placeholders on this site, I didn&apos;t invent a
                 fake achievement or media mention here — that&apos;s a different
                 kind of placeholder than a dummy school name, so this section

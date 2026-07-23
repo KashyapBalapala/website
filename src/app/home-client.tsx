@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DATA } from "@/data/resume";
 
 // TODO: replace with your real GitHub username to show live contribution data
-const GITHUB_USERNAME = "yourusername";
+const GITHUB_USERNAME = "KashyapBalapala";
 
 const BLUR_FADE_DELAY = 0.04;
 
@@ -162,7 +162,7 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
 
       {/* Values Section (dummy placeholder — see chat for why this isn't a fabricated media claim) */}
       <section id="ethics">
-        <GlassCard className="p-4 md:p-6">
+        <GlassCard>
           <Values delay={0} />
         </GlassCard>
       </section>
