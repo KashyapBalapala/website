@@ -64,7 +64,9 @@ export function BlogGraph({ posts }: BlogGraphProps) {
   const nodesRef = useRef<GraphNode[]>([]);
   const router = useRouter();
   const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth >= 640 : true
+  );
   const [highlightedSlug, setHighlightedSlug] = useState<string | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 500 });
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());

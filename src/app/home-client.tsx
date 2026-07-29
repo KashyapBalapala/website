@@ -51,7 +51,7 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
   const moreProjects = DATA.projects.slice(2);
 
   return (
-    <main className="flex flex-col min-h-[100dvh] py-section-lg space-y-6">
+    <main className="flex flex-col min-h-[100dvh] py-8 md:py-section-lg space-y-6 pb-28 md:pb-section-lg">
       {/* Hero Section - Apple-style elegant design */}
       <section id="hero">
         <GlassCard className="hero-glass overflow-hidden">
@@ -72,7 +72,7 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
               <div className="space-y-4 max-w-3xl">
                 <BlurFadeText
                   delay={BLUR_FADE_DELAY * 3}
-                  className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-b from-foreground via-foreground to-foreground/60 bg-clip-text"
+                  className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-b from-foreground via-foreground to-foreground/60 bg-clip-text"
                   yOffset={8}
                   text={`Hi, I'm ${DATA.name.split(" ")[0]}.`}
                 />
@@ -86,7 +86,7 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
 
               {/* Description - clean and elegant */}
               <BlurFade delay={BLUR_FADE_DELAY * 5}>
-                <p className="max-w-xl text-lg md:text-xl text-muted-foreground leading-relaxed font-light">
+                <p className="max-w-xl text-base md:text-xl text-muted-foreground leading-relaxed font-light">
                   {DATA.description}
                 </p>
               </BlurFade>
