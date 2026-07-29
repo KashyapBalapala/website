@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 @layer base {
   :root {
     --background: 220 20% 97%;
@@ -378,6 +382,48 @@ code[data-line-numbers-max-digits="2"]>[data-line]::before {
 
 code[data-line-numbers-max-digits="3"]>[data-line]::before {
   width: 3rem;
+}
+
+@media print {
+  *,
+  *::before,
+  *::after {
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    max-width: 100%;
+  }
+
+  nav,
+  .glass-navbar,
+  .ambient-bg,
+  canvas,
+  #graph,
+  #duolingo,
+  #world,
+  #hyderabad {
+    display: none !important;
+  }
+
+  .glass-card {
+    background: white !important;
+    border: 1px solid #ccc !important;
+    border-radius: 0 !important;
+  }
+
+  a::after {
+    content: " (" attr(href) ")";
+    font-size: 10pt;
+    color: #555;
+  }
 }
 
 @theme inline {

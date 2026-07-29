@@ -2,18 +2,20 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { ChevronDown, BookOpen } from "lucide-react";
+import { ChevronDown, BookOpen, Download } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 
-const GitHubContributions = dynamic(() => import("@/components/github-contributions").then(mod => mod.GitHubContributions), { ssr: false });
-const TechStack = dynamic(() => import("@/components/tech-stack").then(mod => mod.TechStack), { ssr: false });
+const GitHubContributions = dynamic(() => import("@/components/github-contributions").then(mod => mod.GitHubContributions), { ssr: false, loading: () => <Skeleton className="h-48 w-full" /> });
+const TechStack = dynamic(() => import("@/components/tech-stack").then(mod => mod.TechStack), { ssr: false, loading: () => <Skeleton className="h-40 w-full" /> });
 const TimelineItem = dynamic(() => import("@/components/resume-card").then(mod => mod.TimelineItem), { ssr: false });
 const ContactOrbiting = dynamic(() => import("@/components/contact-orbiting").then(mod => mod.ContactOrbiting), { ssr: false });
+const ContactForm = dynamic(() => import("@/components/contact-form").then(mod => mod.ContactForm), { ssr: false });
 
 const HyderabadMap = dynamic(() => import("@/components/hyderabad-map").then(mod => mod.HyderabadMap), { ssr: false });
 const WorldMap = dynamic(() => import("@/components/world-map").then(mod => mod.WorldMap), { ssr: false });
 const ProjectCard = dynamic(() => import("@/components/project-card").then(mod => mod.ProjectCard), { ssr: false });
-const HomeGraph = dynamic(() => import("@/components/home-graph").then(mod => mod.HomeGraph), { ssr: false });
+const HomeGraph = dynamic(() => import("@/components/home-graph").then(mod => mod.HomeGraph), { ssr: false, loading: () => <Skeleton className="h-64 w-full" /> });
 const Values = dynamic(() => import("@/components/values").then(mod => mod.Values), { ssr: false });
 import BlurFade from "@/components/magicui/blur-fade";
 import BlurFadeText from "@/components/magicui/blur-fade-text";
@@ -40,7 +42,6 @@ interface HomeClientProps {
 
 export default function HomeClient({ posts = [] }: HomeClientProps) {
   const [aboutExpanded, setAboutExpanded] = useState(false);
-  const [projectsExpanded, setProjectsExpanded] = useState(false);
   const [expandedBooks, setExpandedBooks] = useState<Record<string, boolean>>({});
 
   const toggleBookCategory = (theme: string) => {
@@ -57,6 +58,17 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
         <GlassCard className="hero-glass overflow-hidden">
           <div className="w-full py-8 md:py-12">
             <div className="flex flex-col items-center text-center space-y-8">
+              {/* Available for hire badge */}
+              <BlurFade delay={BLUR_FADE_DELAY * 1}>
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/50 dark:bg-white/10 border border-white/40 dark:border-white/15 backdrop-blur-sm text-xs font-medium text-muted-foreground">
+                  <span className="relative flex size-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex size-2 rounded-full bg-green-500"></span>
+                  </span>
+                  Open to opportunities
+                </div>
+              </BlurFade>
+
               {/* Avatar with elegant ring */}
               <BlurFade delay={BLUR_FADE_DELAY * 2}>
                 <div className="relative">
@@ -105,6 +117,26 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
                   </a>
                 </p>
               </BlurFade>
+
+              {/* Hero CTAs */}
+              <BlurFade delay={BLUR_FADE_DELAY * 7}>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <a
+                    href="#projects"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-primary/30 bg-white/40 dark:bg-white/10 text-primary text-sm font-medium hover:bg-white/60 dark:hover:bg-white/20 backdrop-blur-sm transition-all duration-200"
+                  >
+                    View Projects
+                  </a>
+                  <a
+                    href="/resume.pdf"
+                    download
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download Resume
+                  </a>
+                </div>
+              </BlurFade>
             </div>
           </div>
         </GlassCard>
@@ -113,6 +145,9 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
       {/* Navigation Graph Section */}
       <section id="graph">
         <GlassCard className="p-4 md:p-6">
+          <p className="text-center text-xs text-muted-foreground/60 mb-3">
+            A map of everything on this site — click any node to navigate.
+          </p>
           <HomeGraph posts={posts} />
         </GlassCard>
       </section>
@@ -121,41 +156,48 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
       <section id="about">
         <GlassCard>
           <div className="space-y-content-md">
-            <div className="flex flex-col items-center gap-3">
-              <h2 className="text-2xl font-bold text-center">About.</h2>
+            <h2 className="text-2xl font-bold text-center">About.</h2>
+
+            <div className="space-y-content-sm">
+              <p className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert leading-relaxed">
+                {DATA.summary.split("\n\n")[0]}
+              </p>
+
+              <AnimatePresence>
+                {aboutExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="space-y-content-sm">
+                      {DATA.summary.split("\n\n").slice(1).map((paragraph, idx) => (
+                        <p
+                          key={idx}
+                          className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert leading-relaxed"
+                        >
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <div className="flex justify-center">
               <button
                 onClick={() => setAboutExpanded(!aboutExpanded)}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground bg-white/50 dark:bg-white/10 hover:bg-white/70 dark:hover:bg-white/20 rounded-full transition-all duration-200 backdrop-blur-sm"
               >
-                {aboutExpanded ? "Hide" : "Read more"}
+                {aboutExpanded ? "Show less" : "Read more"}
                 <ChevronDown
                   className={`w-3.5 h-3.5 transition-transform duration-200 ${aboutExpanded ? "rotate-180" : ""}`}
                 />
               </button>
             </div>
-
-            <AnimatePresence>
-              {aboutExpanded && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="overflow-hidden"
-                >
-                  <div className="space-y-content-sm pt-2">
-                    {DATA.summary.split("\n\n").map((paragraph, idx) => (
-                      <p
-                        key={idx}
-                        className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert leading-relaxed"
-                      >
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
         </GlassCard>
       </section>
@@ -239,51 +281,60 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
               </div>
             </div>
 
-            {/* Expand button */}
-            <div className="flex justify-center">
-              <button
-                onClick={() => setProjectsExpanded(!projectsExpanded)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-full transition-all duration-200 backdrop-blur-sm"
-              >
-                {projectsExpanded ? "Hide projects" : "View projects"}
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform duration-200 ${projectsExpanded ? "rotate-180" : ""}`}
-                />
-              </button>
-            </div>
-
-            {/* All Projects - Hidden by default */}
-            <AnimatePresence>
-              {projectsExpanded && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="overflow-hidden"
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              {[...featuredProjects, ...moreProjects].map((project, id) => (
+                <BlurFade
+                  key={project.title}
+                  delay={0.05 + id * 0.05}
                 >
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {[...featuredProjects, ...moreProjects].map((project, id) => (
-                      <BlurFade
-                        key={project.title}
-                        delay={0.05 + id * 0.05}
-                      >
-                        <ProjectCard
-                          href={project.href}
-                          title={project.title}
-                          description={project.description}
-                          dates={project.dates}
-                          tags={project.technologies}
-                          image={project.image}
-                          video={project.video}
-                          links={project.links}
-                        />
-                      </BlurFade>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  <ProjectCard
+                    href={project.href}
+                    title={project.title}
+                    description={project.description}
+                    dates={project.dates}
+                    tags={project.technologies}
+                    image={project.image}
+                    video={project.video}
+                    links={project.links}
+                  />
+                </BlurFade>
+              ))}
+            </div>
+          </div>
+        </GlassCard>
+      </section>
+
+      {/* Showcase teaser */}
+      <section id="showcase-teaser">
+        <GlassCard className="overflow-hidden">
+          <div className="flex flex-col md:flex-row items-center gap-6 py-2">
+            <div className="flex-1 space-y-3">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                ✦ Interactive Experiments
+              </div>
+              <h2 className="text-2xl font-bold">Beyond the Resume.</h2>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-md">
+                A Rubik&apos;s cube solver, protein folding simulation, aquarium, and more — built for fun, powered by Three.js and WebGL.
+              </p>
+              <a
+                href="/showcase"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                Explore Showcase →
+              </a>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-center shrink-0">
+              {[
+                { emoji: "🧊", label: "Rubik's Solver" },
+                { emoji: "🧬", label: "Protein Folding" },
+                { emoji: "🐠", label: "Aquarium" },
+              ].map(({ emoji, label }) => (
+                <div key={label} className="flex flex-col items-center gap-1 px-3 py-3 rounded-xl bg-white/30 dark:bg-white/10 border border-white/30">
+                  <span className="text-2xl">{emoji}</span>
+                  <span className="text-[10px] text-muted-foreground font-medium">{label}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </GlassCard>
       </section>
@@ -445,10 +496,27 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
 
       {/* Contact Section */}
       <section id="contact">
-        <GlassCard className="p-4 md:p-6">
-          <ContactOrbiting delay={0} />
+        <GlassCard className="p-6 md:p-8">
+          <ContactForm />
+          <div className="mt-8 pt-6 border-t border-white/20 dark:border-white/10">
+            <ContactOrbiting delay={0} />
+          </div>
         </GlassCard>
       </section>
+
+      {/* Built with footer */}
+      <p className="text-center text-xs text-muted-foreground/60 pb-2">
+        Built with{" "}
+        <a href="https://nextjs.org" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground transition-colors duration-150">Next.js</a>
+        {" · "}
+        <a href="https://threejs.org" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground transition-colors duration-150">Three.js</a>
+        {" · "}
+        <a href="https://d3js.org" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground transition-colors duration-150">D3</a>
+        {" · "}
+        <a href="https://www.framer.com/motion" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground transition-colors duration-150">Framer Motion</a>
+        {" · "}
+        <a href="https://ui.shadcn.com" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground transition-colors duration-150">shadcn/ui</a>
+      </p>
     </main>
   );
 }
