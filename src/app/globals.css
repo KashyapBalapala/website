@@ -129,13 +129,15 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .glass-card:hover {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-    transform: translateY(-2px);
-  }
+  @media (hover: hover) {
+    .glass-card:hover {
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
 
-  .dark .glass-card:hover {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    .dark .glass-card:hover {
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    }
   }
 
   /* Glassmorphism navbar - MORE TRANSPARENT / Modern */
@@ -177,8 +179,8 @@
   }
 
   .ambient-orb-1 {
-    width: 600px;
-    height: 600px;
+    width: min(600px, 90vw);
+    height: min(600px, 90vw);
     background: radial-gradient(circle, rgba(var(--gradient-1), 0.4) 0%, transparent 70%);
     top: -200px;
     left: -100px;
@@ -186,8 +188,8 @@
   }
 
   .ambient-orb-2 {
-    width: 500px;
-    height: 500px;
+    width: min(500px, 80vw);
+    height: min(500px, 80vw);
     background: radial-gradient(circle, rgba(var(--gradient-2), 0.4) 0%, transparent 70%);
     top: 30%;
     right: -150px;
@@ -195,8 +197,8 @@
   }
 
   .ambient-orb-3 {
-    width: 400px;
-    height: 400px;
+    width: min(400px, 70vw);
+    height: min(400px, 70vw);
     background: radial-gradient(circle, rgba(var(--gradient-3), 0.35) 0%, transparent 70%);
     bottom: 10%;
     left: 20%;
@@ -204,8 +206,8 @@
   }
 
   .ambient-orb-4 {
-    width: 350px;
-    height: 350px;
+    width: min(350px, 60vw);
+    height: min(350px, 60vw);
     background: radial-gradient(circle, rgba(var(--gradient-4), 0.35) 0%, transparent 70%);
     top: 50%;
     left: 60%;

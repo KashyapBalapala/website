@@ -23,7 +23,7 @@ export default function Navbar() {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 mx-auto mb-4 flex origin-bottom h-full max-h-14">
       <div className="fixed bottom-0 inset-x-0 h-16 w-full bg-gradient-to-t from-background/80 to-transparent backdrop-blur-md"></div>
-      <Dock className="glass-navbar z-50 pointer-events-auto relative mx-auto flex min-h-full h-full items-center px-2 rounded-2xl transform-gpu">
+      <Dock magnification={48} distance={100} className="glass-navbar z-50 pointer-events-auto relative mx-auto flex min-h-full h-full items-center px-1 sm:px-2 rounded-2xl transform-gpu">
         {DATA.navbar.map((item) => (
           <DockIcon key={item.href}>
             <Tooltip>
@@ -32,7 +32,7 @@ export default function Navbar() {
                   href={item.href}
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon" }),
-                    "size-12 rounded-xl hover:bg-white/50 dark:hover:bg-white/10 transition-all duration-200"
+                    "size-9 sm:size-12 rounded-xl hover:bg-white/50 dark:hover:bg-white/10 transition-all duration-200"
                   )}
                 >
                   <item.icon className="size-4" />
@@ -55,7 +55,7 @@ export default function Navbar() {
                     href={social.url}
                     className={cn(
                       buttonVariants({ variant: "ghost", size: "icon" }),
-                      "size-12 rounded-xl hover:bg-white/50 dark:hover:bg-white/10 transition-all duration-200"
+                      "size-9 sm:size-12 rounded-xl hover:bg-white/50 dark:hover:bg-white/10 transition-all duration-200"
                     )}
                   >
                     <social.icon className="size-4" />
@@ -77,7 +77,7 @@ export default function Navbar() {
                 onClick={() => setIsAquariumActive(!isAquariumActive)}
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "icon" }),
-                  "size-12 rounded-xl transition-all duration-200",
+                  "size-9 sm:size-12 rounded-xl transition-all duration-200",
                   isAquariumActive
                     ? "bg-blue-400/30 dark:bg-blue-500/30 shadow-lg shadow-blue-400/20"
                     : "hover:bg-white/50 dark:hover:bg-white/10"

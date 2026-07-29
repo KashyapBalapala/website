@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { DATA } from "@/data/resume";
 import { cn } from "@/lib/utils";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
@@ -46,6 +46,12 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 function AmbientBackground() {
   return (
     <div className="ambient-bg" aria-hidden="true">
@@ -73,7 +79,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light">
           <TooltipProvider delayDuration={0}>
             <AmbientBackground />
-            <div className="relative z-10 max-w-3xl mx-auto px-container-padding">
+            <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-container-padding">
               {children}
             </div>
             <Navbar />

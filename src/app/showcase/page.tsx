@@ -50,7 +50,7 @@ function ShowcaseCard({
 
 export default function ShowcasePage() {
   return (
-    <main className="flex flex-col min-h-[100dvh] py-section-lg space-y-6">
+    <main className="flex flex-col min-h-[100dvh] py-8 md:py-section-lg space-y-6 pb-28 md:pb-section-lg">
       <div className="text-center space-y-3 mb-2">
         <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">
           Showcase.

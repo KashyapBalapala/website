@@ -81,7 +81,7 @@ export default async function BlogPage() {
   });
 
   return (
-    <section className="max-w-3xl mx-auto px-4 py-16">
+    <section className="max-w-3xl mx-auto px-4 py-10 md:py-16 pb-28 md:pb-16">
       <BlurFade delay={BLUR_FADE_DELAY}>
         <div className="mb-12">
           <h1 className="font-semibold text-2xl mb-1 tracking-tight">blog</h1>
