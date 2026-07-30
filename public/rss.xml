@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Kashyap Balapala</title>
+    <link>https://your-domain-here.com</link>
+    <description>Full-stack MEAN developer specializing in SAP integration systems.</description>
+    <atom:link href="https://your-domain-here.com/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Building a Trade Reconciliation Platform</title>
+      <link>https://your-domain-here.com/blog/building-trade-reconciliation-platform</link>
+      <description>Placeholder post — replace with your own real build notes on the trade-recon-platform project.</description>
+      <pubDate>Fri, 10 Apr 2026 00:00:00 GMT</pubDate>
+      <guid>https://your-domain-here.com/blog/building-trade-reconciliation-platform</guid>
+    </item>
+    <item>
+      <title>Preparing for Senior SDE Interviews</title>
+      <link>https://your-domain-here.com/blog/preparing-for-senior-sde-interviews</link>
+      <description>Placeholder post — replace with your own real interview-prep notes.</description>
+      <pubDate>Sun, 01 Mar 2026 00:00:00 GMT</pubDate>
+      <guid>https://your-domain-here.com/blog/preparing-for-senior-sde-interviews</guid>
+    </item>
+    <item>
+      <title>Notes on SAP Integration</title>
+      <link>https://your-domain-here.com/blog/notes-on-sap-integration</link>
+      <description>Placeholder post — replace with your own real notes on working with SAP RFC/BAPI calls.</description>
+      <pubDate>Sun, 15 Feb 2026 00:00:00 GMT</pubDate>
+      <guid>https://your-domain-here.com/blog/notes-on-sap-integration</guid>
+    </item>
+  </channel>
+</rss>

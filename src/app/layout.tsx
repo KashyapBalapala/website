@@ -1,4 +1,8 @@
+import { Analytics } from "@vercel/analytics/react";
 import Navbar from "@/components/navbar";
+import { ScrollProgress } from "@/components/scroll-progress";
+import { BackToTop } from "@/components/back-to-top";
+import { SectionIndicator } from "@/components/section-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -63,6 +67,19 @@ function AmbientBackground() {
   );
 }
 
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: DATA.name,
+  url: DATA.url,
+  jobTitle: "Full-Stack Developer",
+  worksFor: { "@type": "Organization", name: "Innovapptive" },
+  sameAs: [
+    DATA.contact.social.GitHub.url,
+    DATA.contact.social.LinkedIn.url,
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -70,6 +87,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        />
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/rss.xml" />
+      </head>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
@@ -83,6 +107,10 @@ export default function RootLayout({
               {children}
             </div>
             <Navbar />
+            <SectionIndicator />
+            <ScrollProgress />
+            <BackToTop />
+            <Analytics />
           </TooltipProvider>
         </ThemeProvider>
       </body>

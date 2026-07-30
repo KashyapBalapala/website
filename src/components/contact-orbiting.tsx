@@ -67,7 +67,7 @@ export const ContactOrbiting = ({ delay = 0 }: ContactOrbitingProps) => {
   return (
     <motion.section
       ref={ref}
-      id="contact"
+      id="contact-social"
       variants={containerVariants}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
