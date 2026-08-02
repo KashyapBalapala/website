@@ -60,7 +60,7 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
             <div className="flex flex-col items-center text-center space-y-8">
               {/* Available for hire badge */}
               <BlurFade delay={BLUR_FADE_DELAY * 1}>
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/50 dark:bg-white/10 border border-white/40 dark:border-white/15 backdrop-blur-sm text-xs font-medium text-muted-foreground">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/50 dark:bg-white/10 border border-black/10 dark:border-white/15 backdrop-blur-sm text-xs font-medium text-muted-foreground">
                   <span className="relative flex size-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                     <span className="relative inline-flex size-2 rounded-full bg-green-500"></span>
@@ -129,7 +129,7 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
                   </a>
                   <a
                     href="/resume.pdf"
-                    download
+                    download="Kashyap_Balapala_Resume.pdf"
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg"
                   >
                     <Download className="w-4 h-4" />

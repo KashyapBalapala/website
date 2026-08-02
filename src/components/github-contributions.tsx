@@ -55,8 +55,18 @@ export const GitHubContributions = ({ username, delay = 0 }: GitHubContributions
           })
         );
 
+        // Keep only the last 100 days (aligned to week start for the grid)
+        const cutoff = new Date();
+        cutoff.setHours(0, 0, 0, 0);
+        cutoff.setDate(cutoff.getDate() - 99);
+
+        const recent = days.filter((day) => {
+          const d = new Date(day.date + "T00:00:00");
+          return d >= cutoff;
+        });
+
         if (!cancelled) {
-          setContributions(days);
+          setContributions(recent);
         }
       } catch (err) {
         console.error("Error fetching GitHub contributions:", err);
@@ -130,7 +140,7 @@ export const GitHubContributions = ({ username, delay = 0 }: GitHubContributions
           <div className="space-y-2">
             <h2 className="text-2xl font-bold text-center">My GitHub Activity.</h2>
             <p className="text-muted-foreground text-base md:text-lg">
-              Here&apos;s my contribution graph showing my coding activity over the past year.
+              Here&apos;s my contribution graph showing my coding activity over the past 100 days.
             </p>
           </div>
         </div>
