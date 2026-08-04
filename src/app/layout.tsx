@@ -1,5 +1,7 @@
 import { Analytics } from "@vercel/analytics/react";
 import Navbar from "@/components/navbar";
+import { CommandPalette } from "@/components/command-palette";
+import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { ScrollProgress } from "@/components/scroll-progress";
 import { BackToTop } from "@/components/back-to-top";
 import { SectionIndicator } from "@/components/section-indicator";
@@ -107,6 +109,8 @@ export default function RootLayout({
               {children}
             </div>
             <Navbar />
+            <CommandPalette />
+            <KeyboardShortcuts />
             <SectionIndicator />
             <ScrollProgress />
             <BackToTop />

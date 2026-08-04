@@ -17,6 +17,9 @@ const WorldMap = dynamic(() => import("@/components/world-map").then(mod => mod.
 const ProjectCard = dynamic(() => import("@/components/project-card").then(mod => mod.ProjectCard), { ssr: false });
 const HomeGraph = dynamic(() => import("@/components/home-graph").then(mod => mod.HomeGraph), { ssr: false, loading: () => <Skeleton className="h-64 w-full" /> });
 const Values = dynamic(() => import("@/components/values").then(mod => mod.Values), { ssr: false });
+const ImpactMetrics = dynamic(() => import("@/components/impact-metrics").then(mod => mod.ImpactMetrics), { ssr: false, loading: () => <Skeleton className="h-40 w-full" /> });
+const TechStackFlow = dynamic(() => import("@/components/tech-stack-flow").then(mod => mod.TechStackFlow), { ssr: false, loading: () => <Skeleton className="h-40 w-full" /> });
+const CodePlayground = dynamic(() => import("@/components/code-playground").then(mod => mod.CodePlayground), { ssr: false, loading: () => <Skeleton className="h-40 w-full" /> });
 import BlurFade from "@/components/magicui/blur-fade";
 import BlurFadeText from "@/components/magicui/blur-fade-text";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -43,13 +46,20 @@ interface HomeClientProps {
 export default function HomeClient({ posts = [] }: HomeClientProps) {
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const [expandedBooks, setExpandedBooks] = useState<Record<string, boolean>>({});
+  const [techFilter, setTechFilter] = useState<string | null>(null);
 
   const toggleBookCategory = (theme: string) => {
     setExpandedBooks(prev => ({ ...prev, [theme]: !prev[theme] }));
   };
 
-  const featuredProjects = DATA.projects.slice(0, 2);
-  const moreProjects = DATA.projects.slice(2);
+  const allTechnologies = Array.from(
+    new Set(DATA.projects.flatMap((p) => p.technologies))
+  ).sort();
+  const filteredProjects = techFilter
+    ? DATA.projects.filter((p) =>
+        (p.technologies as readonly string[]).includes(techFilter)
+      )
+    : DATA.projects;
 
   return (
     <main className="flex flex-col min-h-[100dvh] py-8 md:py-section-lg space-y-6 pb-28 md:pb-section-lg">
@@ -259,10 +269,24 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
         </GlassCard>
       </section>
 
+      {/* Impact Metrics */}
+      <section id="impact">
+        <GlassCard className="p-4 md:p-6">
+          <ImpactMetrics />
+        </GlassCard>
+      </section>
+
       {/* Tech Stack Section */}
       <section id="tech-stack">
         <GlassCard className="p-4 md:p-6">
           <TechStack delay={0} />
+        </GlassCard>
+      </section>
+
+      {/* Tech Stack Flow Visualization */}
+      <section id="tech-flow">
+        <GlassCard className="p-4 md:p-6">
+          <TechStackFlow />
         </GlassCard>
       </section>
 
@@ -281,8 +305,34 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
               </div>
             </div>
 
+            <div className="flex flex-wrap gap-2 justify-center">
+              <button
+                onClick={() => setTechFilter(null)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                  !techFilter
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                All
+              </button>
+              {allTechnologies.map((tech) => (
+                <button
+                  key={tech}
+                  onClick={() => setTechFilter(techFilter === tech ? null : tech)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                    techFilter === tech
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  {tech}
+                </button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              {[...featuredProjects, ...moreProjects].map((project, id) => (
+              {filteredProjects.map((project, id) => (
                 <BlurFade
                   key={project.title}
                   delay={0.05 + id * 0.05}
@@ -336,6 +386,13 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
               ))}
             </div>
           </div>
+        </GlassCard>
+      </section>
+
+      {/* Live Code Playground */}
+      <section id="code-playground">
+        <GlassCard className="p-4 md:p-6">
+          <CodePlayground />
         </GlassCard>
       </section>
 
