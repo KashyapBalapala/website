@@ -42,15 +42,23 @@ export async function markdownToHTML(markdown: string) {
   return p.toString();
 }
 
+export function getReadingTime(content: string): string {
+  const words = content.trim().split(/\s+/).length;
+  const minutes = Math.max(1, Math.ceil(words / 200));
+  return `${minutes} min read`;
+}
+
 export async function getPost(slug: string) {
   const filePath = path.join("content", `${slug}.mdx`);
   let source = fs.readFileSync(filePath, "utf-8");
   const { content: rawContent, data: metadata } = matter(source);
   const content = await markdownToHTML(rawContent);
+  const readingTime = getReadingTime(rawContent);
   return {
     source: content,
     metadata,
     slug,
+    readingTime,
   };
 }
 
