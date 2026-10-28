@@ -24,7 +24,12 @@ interface TechCategory {
   items?: TechItem[];
 }
 
-const techCategories: TechCategory[] = [
+// RAG is a technique with no official logo, so render a simple text badge
+export const RAG_LOGO = `data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="2" y="14" width="60" height="36" rx="8" fill="#6366f1"/><text x="32" y="39" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#fff" text-anchor="middle">RAG</text></svg>'
+)}`;
+
+export const techCategories: TechCategory[] = [
   {
     category: "Frontend",
     subcategories: [
@@ -41,6 +46,7 @@ const techCategories: TechCategory[] = [
         name: "Frameworks",
         items: [
           { name: "Angular", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/angularjs/angularjs-original.svg" },
+          { name: "React", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
         ]
       }
     ]
@@ -54,6 +60,8 @@ const techCategories: TechCategory[] = [
           { name: "Node.js", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-plain.svg" },
           { name: "Express", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg" },
           { name: "NestJS", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nestjs/nestjs-original.svg" },
+          { name: "Python", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" },
+          { name: "FastAPI", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg" },
         ]
       },
       {
@@ -62,6 +70,8 @@ const techCategories: TechCategory[] = [
           { name: "MongoDB", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg" },
           { name: "Redis", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg" },
           { name: "Kafka", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apachekafka/apachekafka-original.svg" },
+          { name: "RabbitMQ", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rabbitmq/rabbitmq-original.svg" },
+          { name: "SQL", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azuresqldatabase/azuresqldatabase-original.svg" },
         ]
       }
     ]
@@ -71,6 +81,10 @@ const techCategories: TechCategory[] = [
     items: [
       { name: "SAP", logo: "https://cdn.simpleicons.org/sap" },
       { name: "LangChain", logo: "https://cdn.simpleicons.org/langchain" },
+      { name: "LangGraph", logo: "https://cdn.simpleicons.org/langgraph" },
+      { name: "RAG", logo: RAG_LOGO },
+      { name: "PyTorch", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" },
+      { name: "Scikit-learn", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/scikitlearn/scikitlearn-original.svg" },
       { name: "Docker", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" },
       { name: "Git", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" },
       { name: "GitHub", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" },

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { ChevronDown, BookOpen, Download } from "lucide-react";
+import { ChevronDown, BookOpen, Download, Footprints, UtensilsCrossed } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -19,7 +19,6 @@ const HomeGraph = dynamic(() => import("@/components/home-graph").then(mod => mo
 const Values = dynamic(() => import("@/components/values").then(mod => mod.Values), { ssr: false });
 const ImpactMetrics = dynamic(() => import("@/components/impact-metrics").then(mod => mod.ImpactMetrics), { ssr: false, loading: () => <Skeleton className="h-40 w-full" /> });
 const TechStackFlow = dynamic(() => import("@/components/tech-stack-flow").then(mod => mod.TechStackFlow), { ssr: false, loading: () => <Skeleton className="h-40 w-full" /> });
-const CodePlayground = dynamic(() => import("@/components/code-playground").then(mod => mod.CodePlayground), { ssr: false, loading: () => <Skeleton className="h-40 w-full" /> });
 import BlurFade from "@/components/magicui/blur-fade";
 import BlurFadeText from "@/components/magicui/blur-fade-text";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -84,7 +83,11 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
                 <div className="relative">
                   <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20 rounded-full blur-md"></div>
                   <Avatar className="relative size-28 md:size-32 border-2 border-white/60 shadow-2xl">
-                    <AvatarImage alt={DATA.name} src={DATA.avatarUrl} />
+                    <AvatarImage
+                      alt={DATA.name}
+                      src={DATA.avatarUrl}
+                      className="object-cover object-top"
+                    />
                     <AvatarFallback>{DATA.initials}</AvatarFallback>
                   </Avatar>
                 </div>
@@ -300,7 +303,7 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
                   Projects.
                 </h2>
                 <p className="text-muted-foreground md:text-lg/relaxed max-w-lg mx-auto">
-                  A fintech systems project, and two AI-infrastructure builds.
+                  From RAG and ML models to full-stack and fintech systems.
                 </p>
               </div>
             </div>
@@ -364,7 +367,7 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
               </div>
               <h2 className="text-2xl font-bold">Beyond the Resume.</h2>
               <p className="text-muted-foreground text-sm leading-relaxed max-w-md">
-                A Rubik&apos;s cube solver, protein folding simulation, aquarium, and more — built for fun, powered by Three.js and WebGL.
+                A Rubik&apos;s cube solver, a torus-to-mug morph, an aquarium, and more — built for fun, powered by Three.js and WebGL.
               </p>
               <a
                 href="/showcase"
@@ -376,7 +379,7 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
             <div className="grid grid-cols-3 gap-2 text-center shrink-0">
               {[
                 { emoji: "🧊", label: "Rubik's Solver" },
-                { emoji: "🧬", label: "Protein Folding" },
+                { emoji: "🍩", label: "Torus / Mug" },
                 { emoji: "🐠", label: "Aquarium" },
               ].map(({ emoji, label }) => (
                 <div key={label} className="flex flex-col items-center gap-1 px-3 py-3 rounded-xl bg-white/30 dark:bg-white/10 border border-white/30">
@@ -386,13 +389,6 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
               ))}
             </div>
           </div>
-        </GlassCard>
-      </section>
-
-      {/* Live Code Playground */}
-      <section id="code-playground">
-        <GlassCard className="p-4 md:p-6">
-          <CodePlayground />
         </GlassCard>
       </section>
 
@@ -410,18 +406,27 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
             <h2 className="text-2xl font-bold text-center">Beyond the Code.</h2>
             <div className="max-w-lg mx-auto space-y-3">
               <div className="flex items-start gap-3">
-                <BookOpen className="size-4 text-primary flex-shrink-0 mt-1" />
+                <Footprints className="size-4 text-primary flex-shrink-0 mt-1" />
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Translating a Hindi edition of the Bhagavad Gita, with Shankara&apos;s
-                  commentary, into English — Devanagari, IAST transliteration, and
-                  English side by side.
+                  Long walks with no destination — usually early morning, usually
+                  the long way round. Most of my better ideas arrive somewhere
+                  around kilometre four.
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <UtensilsCrossed className="size-4 text-primary flex-shrink-0 mt-1" />
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Cooking without a recipe. Mixed results, honest feedback from
+                  everyone at the table, and a slow ongoing argument about how much
+                  chilli is too much.
                 </p>
               </div>
               <div className="flex items-start gap-3">
                 <BookOpen className="size-4 text-primary flex-shrink-0 mt-1" />
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Studying Advaita Vedanta and systems-level thinking as a parallel
-                  track alongside interview prep.
+                  Reading widely and writing down the lines worth keeping — history,
+                  essays, the occasional novel I finish at 2 a.m. and regret in the
+                  morning.
                 </p>
               </div>
             </div>
@@ -429,14 +434,14 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
         </GlassCard>
       </section>
 
-      {/* Commonplace Book Section (dummy data — replace with your real reading list) */}
+      {/* Commonplace Book Section */}
       <section id="books">
         <GlassCard>
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold">Commonplace Book.</h2>
               <p className="text-sm text-muted-foreground mt-2">
-                Dummy placeholder data — swap in your real reading list in <code>src/data/resume.tsx</code>.
+                Books that changed how I build things — and a few that changed how I think about them.
               </p>
             </div>
 
@@ -528,8 +533,7 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
                   Around Hyderabad.
                 </h2>
                 <p className="text-muted-foreground md:text-lg/relaxed max-w-md mx-auto">
-                  A starter map of the city&apos;s landmarks — swap these for your
-                  own real favorite spots.
+                  Some of the city&apos;s landmarks I call home.
                 </p>
               </div>
             </div>
@@ -543,10 +547,10 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
         <GlassCard className="min-h-[50vh] flex flex-col items-center justify-center">
           <div className="text-8xl md:text-9xl mb-6 animate-bounce">🦉</div>
           <h2 className="text-3xl md:text-5xl font-bold mb-3 text-center" style={{ color: "#6f97a8" }}>
-            Sanskrit or vanish?
+            Mandarin or vanish?
           </h2>
           <p className="text-muted-foreground text-center max-w-sm">
-            847 day streak. The owl remembers everything.
+            Streak intact, grammar negotiable. The owl remembers everything.
           </p>
         </GlassCard>
       </section>

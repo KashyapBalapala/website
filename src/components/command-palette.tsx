@@ -35,7 +35,6 @@ const SECTIONS = [
   { id: "tech-stack", label: "Tech Stack", icon: Cpu },
   { id: "tech-flow", label: "Tech Stack Flow", icon: Cpu },
   { id: "projects", label: "Projects", icon: FolderOpen },
-  { id: "code-playground", label: "Live Code", icon: FileText },
   { id: "github", label: "GitHub Contributions", icon: Github },
   { id: "books", label: "Books", icon: BookOpen },
   { id: "world", label: "World Map", icon: Globe },
@@ -79,8 +78,8 @@ export function CommandPalette() {
   const scrollToSection = useCallback(
     (id: string) => {
       runAction(() => {
-        if (window.location.pathname !== "/") {
-          router.push(`/#${id}`);
+        if (window.location.pathname.replace(/\/$/, "") !== "/portfolio") {
+          router.push(`/portfolio/#${id}`);
           return;
         }
         const el = document.getElementById(id);
