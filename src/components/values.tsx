@@ -8,8 +8,6 @@ interface ValuesProps {
   delay?: number;
 }
 
-// Dummy placeholder — replace with your own real values statement, story,
-// or anything you'd want a hiring manager to read about how you work.
 export const Values = ({ delay = 0 }: ValuesProps) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -56,16 +54,25 @@ export const Values = ({ delay = 0 }: ValuesProps) => {
           >
             <div className="space-y-content-sm pt-2">
               <p className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert leading-relaxed">
-                Dummy placeholder text. This is a good spot for a short statement
-                about how you approach your work — code quality, integrity,
-                collaboration, whatever actually matters to you. Replace this
-                paragraph with your own real words.
+                I start by understanding the problem before reaching for a
+                solution. Most bad code I&apos;ve written came from building the
+                thing I assumed was wanted rather than asking one more question
+                first. So I ask the question — even when it makes me look slower
+                in the first hour.
               </p>
               <p className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert leading-relaxed">
-                Unlike the other placeholders on this site, I didn&apos;t invent a
-                fake achievement or media mention here — that&apos;s a different
-                kind of placeholder than a dummy school name, so this section
-                stays intentionally generic until you write the real thing.
+                I prefer the smallest change that actually solves the problem.
+                Clever abstractions written for a future that never arrives cost
+                more than they save, and the person maintaining them is usually
+                me, six months later, with no memory of why. Boring code that
+                reads clearly beats elegant code that needs a tour guide.
+              </p>
+              <p className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert leading-relaxed">
+                When something breaks, I want the honest version first — what
+                failed, what I missed, what the fix is. Hiding a problem buys a
+                few comfortable hours and costs everyone a week. I&apos;d rather
+                work with people who tell me I&apos;m wrong early, and I try to be
+                that person for them.
               </p>
             </div>
           </motion.div>

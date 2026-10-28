@@ -16,7 +16,7 @@ const LABELS: Record<string, string> = {
   books: "Reading",
   world: "World",
   hyderabad: "Hyderabad",
-  duolingo: "Sanskrit",
+  duolingo: "Mandarin",
   contact: "Contact",
 };
 
@@ -25,7 +25,7 @@ export function SectionIndicator() {
   const [active, setActive] = useState("");
 
   useEffect(() => {
-    if (pathname !== "/") {
+    if (pathname.replace(/\/$/, "") !== "/portfolio") {
       setActive("");
       return;
     }
@@ -36,7 +36,7 @@ export function SectionIndicator() {
           if (e.isIntersecting) setActive(e.target.id);
         }
       },
-      { threshold: 0.3, rootMargin: "-20% 0px -70% 0px" }
+      { threshold: 0, rootMargin: "-20% 0px -70% 0px" }
     );
     ids.forEach((id) => {
       const el = document.getElementById(id);
@@ -45,11 +45,11 @@ export function SectionIndicator() {
     return () => observer.disconnect();
   }, [pathname]);
 
-  if (pathname !== "/" || !active) return null;
+  if (pathname.replace(/\/$/, "") !== "/portfolio" || !active) return null;
 
   return (
     <p className="fixed bottom-20 inset-x-0 text-center text-[10px] text-muted-foreground/60 tracking-wide pointer-events-none z-30">
-      {LABELS[active] ?? ""}
+      <span className="rounded-full bg-background/80 px-2 py-0.5 backdrop-blur-sm">{LABELS[active] ?? ""}</span>
     </p>
   );
 }

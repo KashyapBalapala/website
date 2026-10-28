@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 
 const RubiksCube = dynamic(() => import("@/components/rubiks-cube"), { ssr: false });
-const ProteinFolding = dynamic(() => import("@/components/protein-folding"), { ssr: false });
 const TorusMugMorph = dynamic(() => import("@/components/torus-mug-morph"), { ssr: false });
 const Aquarium = dynamic(() => import("@/components/aquarium").then((mod) => mod.Aquarium), { ssr: false });
 const Companion3D = dynamic(() => import("@/components/companion-3d"), { ssr: false });
@@ -72,15 +71,6 @@ export default function ShowcasePage() {
 
       <ShowcaseCard
         index={2}
-        title="Protein Folding"
-        tag="Simulation"
-        description="A visualization of a polypeptide chain folding into shape, with AlphaFold-style per-residue confidence coloring."
-      >
-        <ProteinFolding />
-      </ShowcaseCard>
-
-      <ShowcaseCard
-        index={3}
         title="Torus / Mug Morph"
         tag="Topology"
         description="A continuous mesh deformation between a torus and a coffee mug — a playful nod to the topologist's joke that they're the same shape."
@@ -89,7 +79,7 @@ export default function ShowcasePage() {
       </ShowcaseCard>
 
       <ShowcaseCard
-        index={4}
+        index={3}
         title="Aquarium"
         tag="Generative"
         description="Fish and shrimp swimming on their own logic, bouncing off the glass — restart the page to reshuffle the tank."
@@ -98,7 +88,7 @@ export default function ShowcasePage() {
       </ShowcaseCard>
 
       <ShowcaseCard
-        index={5}
+        index={4}
         title="A Little Companion"
         tag="Original 3D"
         description="A character built entirely from primitive shapes in code — no external model file, nothing traced from an existing IP. Follows your cursor."

@@ -12,6 +12,7 @@ import {
 import { DATA } from "@/data/resume";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Fish } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -19,6 +20,10 @@ import { Aquarium } from "./aquarium";
 
 export default function Navbar() {
   const [isAquariumActive, setIsAquariumActive] = useState(false);
+  const pathname = usePathname();
+
+  // The terminal home page stands alone; it has its own link to the portfolio
+  if (pathname === "/") return null;
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 mx-auto mb-4 flex origin-bottom h-full max-h-14">

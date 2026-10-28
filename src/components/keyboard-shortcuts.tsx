@@ -54,7 +54,7 @@ export function KeyboardShortcuts() {
       }
 
       const sectionId = SECTION_MAP[e.key];
-      if (sectionId && window.location.pathname === "/") {
+      if (sectionId && window.location.pathname.replace(/\/$/, "") === "/portfolio") {
         e.preventDefault();
         const el = document.getElementById(sectionId);
         el?.scrollIntoView({ behavior: "smooth", block: "start" });

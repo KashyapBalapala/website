@@ -1,10 +1,10 @@
 import { Icons } from "@/components/icons";
-import { HomeIcon, NotebookIcon, SparklesIcon } from "lucide-react";
+import { HomeIcon, LayoutGridIcon, NotebookIcon, SparklesIcon } from "lucide-react";
 
 export const DATA = {
   name: "Kashyap Balapala",
   initials: "KB",
-  url: "https://your-domain-here.com",
+  url: "https://kashyap-balapala.vercel.app",
   location: "Hyderabad, India",
   locationLink: "https://www.google.com/maps/place/hyderabad",
   description:
@@ -15,6 +15,7 @@ export const DATA = {
 
   navbar: [
     { href: "/", icon: HomeIcon, label: "Home" },
+    { href: "/portfolio", icon: LayoutGridIcon, label: "Portfolio" },
     { href: "/blog", icon: NotebookIcon, label: "Blog" },
     { href: "/showcase", icon: SparklesIcon, label: "Showcase" },
   ],
@@ -114,61 +115,113 @@ export const DATA = {
   ],
   projects: [
     {
-      title: "RAG Knowledge Assistant",
-      href: "",
-      dates: "Personal project",
+      title: "Medical RAG Assistant",
+      href: "https://github.com/KashyapBalapala/medical-rag",
+      dates: "2026",
       active: true,
       description:
-        "A retrieval-augmented generation system using embeddings and semantic search for enterprise knowledge retrieval, with chunking and retrieval pipelines tuned for answer relevance.",
-      technologies: ["Python", "Vector Search", "LLMs", "RAG"],
-      links: [],
+        "Question answering over uploaded clinical-guideline PDFs. Chunks documents with LangChain, embeds them locally into ChromaDB, and answers through a local Ollama LLM with cited sources, confidence scores, and an evidence viewer.",
+      technologies: ["Next.js", "TypeScript", "LangChain", "ChromaDB", "Ollama", "RAG"],
+      links: [
+        { type: "Source", href: "https://github.com/KashyapBalapala/medical-rag", icon: <Icons.github className="size-3" /> },
+      ],
       image: "",
       video: "",
     },
     {
-      title: "Demand Forecasting Platform",
-      href: "",
-      dates: "Personal project",
+      title: "RiskLens",
+      href: "https://github.com/KashyapBalapala/financial-risk-platform",
+      dates: "2026",
       active: true,
       description:
-        "An end-to-end ML forecasting platform for multi-location demand prediction, benchmarking Regression, Random Forest, and XGBoost for optimal accuracy.",
-      technologies: ["Python", "XGBoost", "Scikit-learn", "ML"],
-      links: [],
+        "A financial risk platform that ingests transactions, evaluates configured risk rules, and surfaces generated alerts to authenticated investigators.",
+      technologies: ["Next.js", "TypeScript", "PostgreSQL", "Drizzle ORM", "Docker"],
+      links: [
+        { type: "Source", href: "https://github.com/KashyapBalapala/financial-risk-platform", icon: <Icons.github className="size-3" /> },
+      ],
       image: "",
       video: "",
     },
     {
-      title: "Generative Design Copilot",
-      href: "",
-      dates: "Personal project",
+      title: "Stock Price Predictor",
+      href: "https://github.com/KashyapBalapala/Stock-App",
+      dates: "2025",
       active: true,
       description:
-        "A prompt-driven generative assistant with low-latency inference workflows and an intuitive UI built on the OpenAI API.",
-      technologies: ["OpenAI API", "Gradio", "Python"],
-      links: [],
+        "A Django REST backend that pulls market data with yfinance and forecasts prices with an LSTM model, paired with a React dashboard charting top stocks.",
+      technologies: ["Python", "Django", "TensorFlow", "React", "Chart.js"],
+      links: [
+        { type: "Source", href: "https://github.com/KashyapBalapala/Stock-App", icon: <Icons.github className="size-3" /> },
+      ],
+      image: "",
+      video: "",
+    },
+    {
+      title: "Location & Work Package Quantities Manager",
+      href: "https://github.com/KashyapBalapala/Location-and-Work-Package-Quantities-Management-System",
+      dates: "2025",
+      active: true,
+      description:
+        "A MEAN stack app for managing locations, location types, work packages, units of measure, and quantities, with an Angular frontend and an Express/MongoDB API.",
+      technologies: ["Angular", "Node.js", "Express", "MongoDB"],
+      links: [
+        { type: "Source", href: "https://github.com/KashyapBalapala/Location-and-Work-Package-Quantities-Management-System", icon: <Icons.github className="size-3" /> },
+      ],
+      image: "",
+      video: "",
+    },
+    {
+      title: "Buddy Mart",
+      href: "https://github.com/KashyapBalapala/Buddy_Mart_v1",
+      dates: "2024",
+      active: true,
+      description:
+        "A social marketplace with products, posts, friend requests, groups, and real-time chat over Socket.IO, with Google OAuth sign-in and a Dockerized Express/MongoDB backend.",
+      technologies: ["Node.js", "Express", "MongoDB", "Socket.IO", "Docker"],
+      links: [
+        { type: "Source", href: "https://github.com/KashyapBalapala/Buddy_Mart_v1", icon: <Icons.github className="size-3" /> },
+      ],
+      image: "",
+      video: "",
+    },
+    {
+      title: "Brain Tumor Analysis",
+      href: "https://github.com/KashyapBalapala/Brain_Tumor_Analysis",
+      dates: "2024",
+      active: true,
+      description:
+        "MRI brain tumor detection notebooks: preprocessing with cropping, NLM denoising, and CLAHE enhancement, then classification with a custom CNN, VGG19, and ResNet50.",
+      technologies: ["Python", "Deep Learning", "OpenCV", "Jupyter"],
+      links: [
+        { type: "Source", href: "https://github.com/KashyapBalapala/Brain_Tumor_Analysis", icon: <Icons.github className="size-3" /> },
+      ],
       image: "",
       video: "",
     },
   ],
   books: [
     {
-      theme: "Philosophy",
+      theme: "Technical",
       books: [
-        { title: "Dummy Book Title One", author: "Author Name", number: 1 },
-        { title: "Dummy Book Title Two", author: "Author Name", number: 2 },
+        { title: "Designing Data-Intensive Applications", author: "Martin Kleppmann", number: 1 },
+        { title: "The Pragmatic Programmer", author: "Andrew Hunt & David Thomas", number: 2 },
+        { title: "Database Internals", author: "Alex Petrov", number: 3 },
       ],
     },
     {
       theme: "Systems & Thinking",
       books: [
-        { title: "Dummy Book Title Three", author: "Author Name", number: 3 },
-        { title: "Dummy Book Title Four", author: "Author Name", number: 4 },
+        { title: "Thinking in Systems", author: "Donella Meadows", number: 4 },
+        { title: "Thinking, Fast and Slow", author: "Daniel Kahneman", number: 5 },
+        { title: "The Design of Everyday Things", author: "Don Norman", number: 6 },
       ],
     },
     {
-      theme: "Technical",
+      theme: "Philosophy",
       books: [
-        { title: "Dummy Book Title Five", author: "Author Name", number: 5 },
+        { title: "Meditations", author: "Marcus Aurelius", number: 7 },
+        { title: "Letters from a Stoic", author: "Seneca", number: 8 },
+        { title: "Man's Search for Meaning", author: "Viktor E. Frankl", number: 9 },
       ],
     },
   ],
