@@ -40,6 +40,25 @@ interface AquariumProps {
   variant?: "viewport" | "contained";
 }
 
+// Also walks the floor of the terminal's background tank
+export const ShrimpSvg = ({ size, color }: { size: number; color: string }) => (
+  <svg width={size * 0.8} height={size} viewBox="0 0 20 25" fill={color}>
+    {/* Shrimp body segments */}
+    <ellipse cx="10" cy="8" rx="6" ry="4" />
+    <ellipse cx="10" cy="12" rx="6" ry="4" />
+    <ellipse cx="10" cy="16" rx="6" ry="4" />
+    <ellipse cx="10" cy="20" rx="6" ry="4" />
+    {/* Shrimp tail */}
+    <path d="M4 20 L0 22 L0 18 Z" />
+    {/* Shrimp antennae */}
+    <line x1="10" y1="6" x2="8" y2="3" stroke={color} strokeWidth="1" />
+    <line x1="10" y1="6" x2="12" y2="3" stroke={color} strokeWidth="1" />
+    {/* Shrimp eyes */}
+    <circle cx="8" cy="6" r="1" fill="white" />
+    <circle cx="12" cy="6" r="1" fill="white" />
+  </svg>
+);
+
 export const Aquarium = ({ isActive, variant = "contained" }: AquariumProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 600, height: 320 });
@@ -163,26 +182,7 @@ export const Aquarium = ({ isActive, variant = "contained" }: AquariumProps) => 
     } else {
       return (
         <div key={creature.id} style={style}>
-          <svg
-            width={creature.size * 0.8}
-            height={creature.size}
-            viewBox="0 0 20 25"
-            fill={creature.color}
-          >
-            {/* Shrimp body segments */}
-            <ellipse cx="10" cy="8" rx="6" ry="4" />
-            <ellipse cx="10" cy="12" rx="6" ry="4" />
-            <ellipse cx="10" cy="16" rx="6" ry="4" />
-            <ellipse cx="10" cy="20" rx="6" ry="4" />
-            {/* Shrimp tail */}
-            <path d="M4 20 L0 22 L0 18 Z" />
-            {/* Shrimp antennae */}
-            <line x1="10" y1="6" x2="8" y2="3" stroke={creature.color} strokeWidth="1" />
-            <line x1="10" y1="6" x2="12" y2="3" stroke={creature.color} strokeWidth="1" />
-            {/* Shrimp eyes */}
-            <circle cx="8" cy="6" r="1" fill="white" />
-            <circle cx="12" cy="6" r="1" fill="white" />
-          </svg>
+          <ShrimpSvg size={creature.size} color={creature.color} />
         </div>
       );
     }

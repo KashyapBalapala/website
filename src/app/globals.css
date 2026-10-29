@@ -519,11 +519,8 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
     to { opacity: 1; transform: scale(1) translateY(0); }
   }
 }
-/* Terminal home page: macOS-style window on a white page with drifting mist */
+/* Terminal home page: a macOS-style window floating in an aquarium */
 .kterm-page {
-  --mist-1: #e3e3e8;
-  --mist-2: #d8d8dd;
-  --mist-3: #eeeef2;
   position: fixed;
   inset: 0;
   z-index: 40;
@@ -532,26 +529,156 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
   justify-content: center;
   padding: 4rem 2.5rem;
   overflow: hidden;
-  background: #fff;
+  background: #0d3346;
 }
 
-.kterm-page::before {
-  content: "";
+/* Aquarium behind the terminal: CSS draws the water, controller.ts moves the fish */
+.aq {
   position: absolute;
-  inset: -25%;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
   pointer-events: none;
-  background:
-    radial-gradient(32% 38% at 22% 28%, var(--mist-1), transparent 70%),
-    radial-gradient(36% 32% at 78% 72%, var(--mist-2), transparent 70%),
-    radial-gradient(28% 30% at 64% 18%, var(--mist-3), transparent 70%);
-  filter: blur(30px);
-  animation: ktermDrift 36s ease-in-out infinite alternate;
+  background: linear-gradient(180deg, var(--aq-surface) 0%, var(--aq-water) 46%, var(--aq-deep) 100%);
 }
-
-@keyframes ktermDrift {
-  0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
-  50% { transform: translate3d(5%, -4%, 0) rotate(10deg) scale(1.1); }
-  100% { transform: translate3d(-4%, 5%, 0) rotate(-8deg) scale(1.03); }
+.aq-depth {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(90% 55% at 30% 0%, rgba(255, 255, 255, 0.1), transparent 70%),
+    radial-gradient(70% 50% at 80% 100%, rgba(0, 0, 0, 0.22), transparent 70%);
+}
+/* Surface shimmer: a wide tiled band sliding sideways, faded out with depth */
+.aq-surface {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 24vh;
+  opacity: 0.55;
+  background:
+    radial-gradient(60px 9px at 30% 40%, var(--aq-ray), transparent 70%),
+    radial-gradient(90px 12px at 75% 70%, var(--aq-ray), transparent 70%);
+  background-size: 260px 70px;
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent);
+  mask-image: linear-gradient(180deg, #000, transparent);
+  animation: aqSurface 60s linear infinite;
+}
+@keyframes aqSurface { to { transform: translate3d(-50%, 0, 0); } }
+.aq-rays span {
+  position: absolute;
+  top: -12%;
+  width: var(--w);
+  height: 95%;
+  background: linear-gradient(180deg, var(--aq-ray), transparent 80%);
+  transform-origin: 50% 0;
+  animation: aqRay var(--d) ease-in-out infinite alternate;
+}
+@keyframes aqRay {
+  from { opacity: 0.35; transform: translate3d(-2vw, 0, 0) skewX(-16deg); }
+  to { opacity: 0.85; transform: translate3d(2vw, 0, 0) skewX(-9deg); }
+}
+.aq-floor { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: var(--aq-floor); }
+.aq-rock { position: absolute; bottom: calc(var(--aq-floor) * 0.18); }
+.aq-plant {
+  position: absolute;
+  bottom: calc(var(--aq-floor) * 0.25);
+  transform-origin: 50% 100%;
+  animation: aqSway var(--d) ease-in-out infinite alternate;
+}
+@keyframes aqSway { from { transform: rotate(-3deg); } to { transform: rotate(4deg); } }
+.aq-shrimp {
+  position: absolute;
+  bottom: calc(var(--aq-floor) * 0.3);
+  opacity: 0.85;
+  animation: aqWalk var(--d) ease-in-out infinite;
+}
+.aq-shrimp svg { display: block; transform: rotate(90deg); }
+/* Keyframes avoid var() throughout the tank, so the browser can run them on the GPU */
+@keyframes aqWalk {
+  0% { transform: translate3d(0, 0, 0) scaleX(1); }
+  45% { transform: translate3d(90px, 0, 0) scaleX(1); }
+  50% { transform: translate3d(90px, 0, 0) scaleX(-1); }
+  95% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(1); }
+}
+.aq-bubble {
+  position: absolute;
+  bottom: calc(var(--aq-floor) * 0.45);
+  animation: aqRise var(--d) linear infinite;
+}
+.aq-ball, .aq-bit { display: block; }
+.aq-ball {
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  border: 1px solid var(--aq-bubble);
+  background: radial-gradient(circle at 32% 30%, rgba(255, 255, 255, 0.85) 0 18%, transparent 30%);
+}
+.aq-bit { color: var(--aq-bubble); font: 11px/1 ui-monospace, monospace; }
+/* The side-to-side wobble lives inside the rise: each cycle end costs a main-thread style update */
+@keyframes aqRise {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  8% { opacity: 1; }
+  20% { transform: translate3d(7px, -20vh, 0); }
+  40% { transform: translate3d(-6px, -40vh, 0); }
+  60% { transform: translate3d(8px, -60vh, 0); }
+  80% { transform: translate3d(-5px, -80vh, 0); }
+  85% { opacity: 0.8; }
+  100% { transform: translate3d(3px, -100vh, 0); opacity: 0; }
+}
+/* Fish start hidden and fade in once the controller has placed them */
+.aq-fish {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  will-change: transform;
+  transition: opacity 1.4s ease;
+}
+.aq-fish svg { display: block; overflow: visible; }
+.aq-body { position: absolute; inset: 0; }
+.aq.is-live .aq-fish { opacity: var(--o, 1); }
+.aq.is-live .aq-fish.is-behind { opacity: 0; transition-duration: 0.5s; }
+.aq-distant { --o: 0.35; }
+.aq-distant svg { filter: blur(1.2px); }
+.aq-school { --o: 0; }
+.aq-school-on .aq-school { --o: 0.85; }
+/* Tail sits where the drawing's tail was: x 2–13, y 4–24 of the 48×28 fish */
+.aq-tail {
+  position: absolute;
+  left: 4.2%;
+  top: 14.3%;
+  width: 23%;
+  height: 71.4%;
+  transform-origin: 100% 50%;
+  animation: aqTail var(--tail) ease-in-out infinite;
+}
+/* Eight beats per cycle, so a cycle ends (and costs a style update) only every few seconds */
+@keyframes aqTail {
+  0%, 25%, 50%, 75%, 100% { transform: rotate(-14deg); }
+  12.5%, 37.5%, 62.5%, 87.5% { transform: rotate(14deg); }
+}
+.aq-glow .aq-main svg { filter: drop-shadow(0 0 4px currentColor); }
+.aq-golden { z-index: 1; }
+.aq-golden svg { filter: drop-shadow(0 0 8px rgba(255, 196, 70, 0.75)); }
+.aq-food {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 1px;
+  background: #d9a45b;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+/* `aquarium off`: still water, nothing moving */
+.aq.is-off .aq-fish, .aq.is-off .aq-bubble, .aq.is-off .aq-food, .aq.is-off .aq-shrimp { opacity: 0; }
+.aq.is-off *, .aq.is-off *::before { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .aq *, .aq *::before { animation: none !important; }
+  .aq-bubble, .aq-shrimp { display: none; }
 }
 
 .kterm {
@@ -576,7 +703,8 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
   border-radius: 16px;
   background: var(--win);
   color: var(--label);
-  backdrop-filter: blur(30px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
   box-shadow:
     0 0 0 0.5px rgba(0, 0, 0, 0.22),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.1),
@@ -590,10 +718,10 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
 }
 
 .kterm[data-theme="light"] {
-  --win: rgba(255, 255, 255, 0.86);
+  --win: rgba(255, 255, 255, 0.92);
   --label: #1d1d1f;
   --secondary: #5f5f64;
-  --tertiary: #737378;
+  --tertiary: #6b6b70;
   --accent: #3f6a7c;
   --separator: rgba(0, 0, 0, 0.07);
   --control: #d1d1d6;
@@ -984,7 +1112,7 @@ a.kterm-link { padding-block: 2px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kterm-page::before, .kterm-input.focused .kterm-cursor, .kterm-cursor-on, .kterm-reveal,
+  .kterm-input.focused .kterm-cursor, .kterm-cursor-on, .kterm-reveal,
   .kterm-unlock, .kterm.is-party { animation: none; }
 }
 

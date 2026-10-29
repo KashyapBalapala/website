@@ -12,6 +12,7 @@ import {
   type FsNode, type Out, type Post, type ThemeName,
 } from "./content";
 import { Game2048, Matrix, Snake, Stream, cowsay } from "./fx";
+import { Aquarium, type TankHandle } from "./aquarium";
 import { PERSONAS, PERSONA_KEYS, QUIZ, SNIPPETS, arrival, banner, greeting, matchJob, shuffle, typingScore, type Persona, type Question } from "./extras";
 
 const USER = "guest@kashyap";
@@ -55,6 +56,7 @@ const KEYS = {
   quizBest: "terminal-quiz-best",
   typingBest: "terminal-typing-best",
   github: "terminal-github",
+  aquarium: "terminal-aquarium",
 };
 
 const ALIASES: Record<string, string> = {
@@ -75,6 +77,7 @@ const VISIBLE = [
   ...Object.keys(SECTIONS), "neofetch", "help", "ls", "cd", "cat", "tree", "pwd", "open", "portfolio", "resume",
   "msg", "copy", "share", "github", "blog", "time", "theme", "man", "history", "secrets", "hint", "clear",
   "echo", "date", "uname", "uptime", "whoami", "match", "tour", "quiz", "typing", "banner", "name", "path", "feedback", "guestbook",
+  "feed", "tank", "aquarium",
 ];
 
 type Mode =
@@ -178,6 +181,8 @@ export function Terminal({ posts }: { posts: Post[] }) {
   const [arrivalLine, setArrivalLine] = useState<string | null>(null);
   const [idleHint, setIdleHint] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [tankOn, setTankOn] = useState(true);
+  const tankRef = useRef<TankHandle>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const [focused, setFocused] = useState(false);
@@ -207,6 +212,7 @@ export function Terminal({ posts }: { posts: Post[] }) {
   useEffect(() => {
     const savedTheme = load(KEYS.theme) as ThemeName | null;
     if (savedTheme && THEMES.includes(savedTheme)) setThemeState(savedTheme);
+    if (load(KEYS.aquarium) === "off") setTankOn(false);
     try {
       const saved = JSON.parse(load(KEYS.history) ?? "[]");
       if (Array.isArray(saved)) {
@@ -945,6 +951,36 @@ export function Terminal({ posts }: { posts: Post[] }) {
         return { lines: [new Date().toString()] };
       case "uname":
         return { lines: ["KashyapOS 1.0 (Next.js 14) x86_64"] };
+      case "feed": {
+        if (!tankOn) return { lines: ["the fish are resting. 'aquarium on' wakes them up."], next: ["aquarium on"] };
+        const noticed = tankRef.current?.feed() ?? 0;
+        if (!noticed) return { lines: ["the fish are holding still right now (reduced motion is on, or the tank is still waking up)."] };
+        return { lines: [`sprinkled some food. ${noticed} fish noticed.`], next: ["tank"] };
+      }
+      case "tank": {
+        const t = tankRef.current?.stats();
+        if (!t) return { lines: ["the tank is still filling. try again in a second."] };
+        const mins = Math.floor(t.uptime / 60_000);
+        const states = { starting: "starting up", swimming: "swimming", paused: "paused (tab in the background)", still: "still (reduced motion)", off: "off" };
+        return {
+          lines: [
+            `fish        ${t.fish}`,
+            `bubbles     ${t.bubbles}`,
+            `meals       ${t.meals} flake${t.meals === 1 ? "" : "s"} eaten`,
+            `water       ${mins ? `${mins} min` : "under a minute"} since the tank filled`,
+            `theme       ${theme}`,
+            `state       ${states[t.state]}`,
+          ],
+          next: tankOn ? ["feed", "aquarium off"] : ["aquarium on"],
+        };
+      }
+      case "aquarium": {
+        if (args[0] !== "on" && args[0] !== "off") return { lines: [`aquarium is ${tankOn ? "on" : "off"}. usage: aquarium on | off`], next: ["tank"] };
+        const on = args[0] === "on";
+        setTankOn(on);
+        save(KEYS.aquarium, on ? "on" : "off");
+        return { lines: [on ? "aquarium on. the fish are back." : "aquarium off. the water stays, everything else holds still."] };
+      }
       case "uptime":
         return { lines: [`up ${Math.max(1, Math.round((Date.now() - bootedAt.current) / 60_000))} min, 1 user, load average: caffeinated`] };
       case "sudo":
@@ -1347,6 +1383,7 @@ export function Terminal({ posts }: { posts: Post[] }) {
   if (win === "closed") {
     return (
       <div className="kterm-page">
+        <Aquarium ref={tankRef} theme={theme} enabled={tankOn} golden={found.length === SECRETS.length} />
         <div className="kterm-closed sans">
           <p>Terminal closed.</p>
           <div>
@@ -1373,6 +1410,7 @@ export function Terminal({ posts }: { posts: Post[] }) {
   return (
     <RunContext.Provider value={runClicked}>
       <div className="kterm-page">
+        <Aquarium ref={tankRef} theme={theme} enabled={tankOn} golden={found.length === SECRETS.length} />
         {/* First Tab stop: a way out for keyboard and screen-reader visitors */}
         <nav aria-label="Skip link"><Link href="/portfolio" className="kterm-skip sans">Skip to the standard portfolio</Link></nav>
         <div
