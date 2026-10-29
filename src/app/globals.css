@@ -335,19 +335,22 @@ pre>code {
   counter-reset: line;
 }
 
+/* Code blocks sit on a dark background in both site themes, so always use the dark palette */
 code[data-theme*=" "],
 code[data-theme*=" "] span {
-  color: var(--shiki-light);
-  background-color: var(--shiki-light-bg);
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
 }
 
-@media (prefers-color-scheme: dark) {
+/* Blocks without a language get no per-line padding from the highlighter */
+pre > code:not([data-language]) {
+  @apply block px-4;
+}
 
-  code[data-theme*=" "],
-  code[data-theme*=" "] span {
-    color: var(--shiki-dark);
-    background-color: var(--shiki-dark-bg);
-  }
+/* Typography adds literal backticks around inline code */
+.prose :where(code):not(:where(pre code))::before,
+.prose :where(code):not(:where(pre code))::after {
+  content: none;
 }
 
 code[data-line-numbers] {
@@ -516,11 +519,8 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
     to { opacity: 1; transform: scale(1) translateY(0); }
   }
 }
-/* Terminal home page: macOS-style window on a white page with drifting mist */
+/* Terminal home page: a macOS-style window floating in an aquarium */
 .kterm-page {
-  --mist-1: #e3e3e8;
-  --mist-2: #d8d8dd;
-  --mist-3: #eeeef2;
   position: fixed;
   inset: 0;
   z-index: 40;
@@ -529,33 +529,164 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
   justify-content: center;
   padding: 4rem 2.5rem;
   overflow: hidden;
-  background: #fff;
+  background: #0d3346;
 }
 
-.kterm-page::before {
-  content: "";
+/* Aquarium behind the terminal: CSS draws the water, controller.ts moves the fish */
+.aq {
   position: absolute;
-  inset: -25%;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
   pointer-events: none;
-  background:
-    radial-gradient(32% 38% at 22% 28%, var(--mist-1), transparent 70%),
-    radial-gradient(36% 32% at 78% 72%, var(--mist-2), transparent 70%),
-    radial-gradient(28% 30% at 64% 18%, var(--mist-3), transparent 70%);
-  filter: blur(30px);
-  animation: ktermDrift 36s ease-in-out infinite alternate;
+  background: linear-gradient(180deg, var(--aq-surface) 0%, var(--aq-water) 46%, var(--aq-deep) 100%);
 }
-
-@keyframes ktermDrift {
-  0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
-  50% { transform: translate3d(5%, -4%, 0) rotate(10deg) scale(1.1); }
-  100% { transform: translate3d(-4%, 5%, 0) rotate(-8deg) scale(1.03); }
+.aq-depth {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(90% 55% at 30% 0%, rgba(255, 255, 255, 0.1), transparent 70%),
+    radial-gradient(70% 50% at 80% 100%, rgba(0, 0, 0, 0.22), transparent 70%);
+}
+/* Surface shimmer: a wide tiled band sliding sideways, faded out with depth */
+.aq-surface {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 24vh;
+  opacity: 0.55;
+  background:
+    radial-gradient(60px 9px at 30% 40%, var(--aq-ray), transparent 70%),
+    radial-gradient(90px 12px at 75% 70%, var(--aq-ray), transparent 70%);
+  background-size: 260px 70px;
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent);
+  mask-image: linear-gradient(180deg, #000, transparent);
+  animation: aqSurface 60s linear infinite;
+}
+@keyframes aqSurface { to { transform: translate3d(-50%, 0, 0); } }
+.aq-rays span {
+  position: absolute;
+  top: -12%;
+  width: var(--w);
+  height: 95%;
+  background: linear-gradient(180deg, var(--aq-ray), transparent 80%);
+  transform-origin: 50% 0;
+  animation: aqRay var(--d) ease-in-out infinite alternate;
+}
+@keyframes aqRay {
+  from { opacity: 0.35; transform: translate3d(-2vw, 0, 0) skewX(-16deg); }
+  to { opacity: 0.85; transform: translate3d(2vw, 0, 0) skewX(-9deg); }
+}
+.aq-floor { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: var(--aq-floor); }
+.aq-rock { position: absolute; bottom: calc(var(--aq-floor) * 0.18); }
+.aq-plant {
+  position: absolute;
+  bottom: calc(var(--aq-floor) * 0.25);
+  transform-origin: 50% 100%;
+  animation: aqSway var(--d) ease-in-out infinite alternate;
+}
+@keyframes aqSway { from { transform: rotate(-3deg); } to { transform: rotate(4deg); } }
+.aq-shrimp {
+  position: absolute;
+  bottom: calc(var(--aq-floor) * 0.3);
+  opacity: 0.85;
+  animation: aqWalk var(--d) ease-in-out infinite;
+}
+.aq-shrimp svg { display: block; transform: rotate(90deg); }
+/* Keyframes avoid var() throughout the tank, so the browser can run them on the GPU */
+@keyframes aqWalk {
+  0% { transform: translate3d(0, 0, 0) scaleX(1); }
+  45% { transform: translate3d(90px, 0, 0) scaleX(1); }
+  50% { transform: translate3d(90px, 0, 0) scaleX(-1); }
+  95% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(1); }
+}
+.aq-bubble {
+  position: absolute;
+  bottom: calc(var(--aq-floor) * 0.45);
+  animation: aqRise var(--d) linear infinite;
+}
+.aq-ball, .aq-bit { display: block; }
+.aq-ball {
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  border: 1px solid var(--aq-bubble);
+  background: radial-gradient(circle at 32% 30%, rgba(255, 255, 255, 0.85) 0 18%, transparent 30%);
+}
+.aq-bit { color: var(--aq-bubble); font: 11px/1 ui-monospace, monospace; }
+/* The side-to-side wobble lives inside the rise: each cycle end costs a main-thread style update */
+@keyframes aqRise {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  8% { opacity: 1; }
+  20% { transform: translate3d(7px, -20vh, 0); }
+  40% { transform: translate3d(-6px, -40vh, 0); }
+  60% { transform: translate3d(8px, -60vh, 0); }
+  80% { transform: translate3d(-5px, -80vh, 0); }
+  85% { opacity: 0.8; }
+  100% { transform: translate3d(3px, -100vh, 0); opacity: 0; }
+}
+/* Fish start hidden and fade in once the controller has placed them */
+.aq-fish {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  will-change: transform;
+  transition: opacity 1.4s ease;
+}
+.aq-fish svg { display: block; overflow: visible; }
+.aq-body { position: absolute; inset: 0; }
+.aq.is-live .aq-fish { opacity: var(--o, 1); }
+.aq.is-live .aq-fish.is-behind { opacity: 0; transition-duration: 0.5s; }
+.aq-distant { --o: 0.35; }
+.aq-distant svg { filter: blur(1.2px); }
+.aq-school { --o: 0; }
+.aq-school-on .aq-school { --o: 0.85; }
+/* Tail sits where the drawing's tail was: x 2–13, y 4–24 of the 48×28 fish */
+.aq-tail {
+  position: absolute;
+  left: 4.2%;
+  top: 14.3%;
+  width: 23%;
+  height: 71.4%;
+  transform-origin: 100% 50%;
+  animation: aqTail var(--tail) ease-in-out infinite;
+}
+/* Eight beats per cycle, so a cycle ends (and costs a style update) only every few seconds */
+@keyframes aqTail {
+  0%, 25%, 50%, 75%, 100% { transform: rotate(-14deg); }
+  12.5%, 37.5%, 62.5%, 87.5% { transform: rotate(14deg); }
+}
+.aq-glow .aq-main svg { filter: drop-shadow(0 0 4px currentColor); }
+.aq-golden { z-index: 1; }
+.aq-golden svg { filter: drop-shadow(0 0 8px rgba(255, 196, 70, 0.75)); }
+.aq-food {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 1px;
+  background: #d9a45b;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+/* `aquarium off`: still water, nothing moving */
+.aq.is-off .aq-fish, .aq.is-off .aq-bubble, .aq.is-off .aq-food, .aq.is-off .aq-shrimp { opacity: 0; }
+.aq.is-off *, .aq.is-off *::before { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .aq *, .aq *::before { animation: none !important; }
+  .aq-bubble, .aq-shrimp { display: none; }
 }
 
 .kterm {
   --win: rgba(28, 28, 30, 0.94);
   --label: #f5f5f7;
   --secondary: #a1a1a6;
-  --tertiary: #6e6e73;
+  --tertiary: #919195;
+  --accent: #8eb1c2;
   --separator: rgba(255, 255, 255, 0.08);
   --control: #48484a;
   --hover: rgba(255, 255, 255, 0.08);
@@ -564,7 +695,7 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
   --cursor-text: #1c1c1e;
   position: relative;
   z-index: 1;
-  width: min(820px, 100%, calc((100dvh - 8rem) * 1.6));
+  width: min(1040px, 100%, calc((100dvh - 7rem) * 1.6));
   aspect-ratio: 16 / 10;
   display: flex;
   flex-direction: column;
@@ -572,7 +703,8 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
   border-radius: 16px;
   background: var(--win);
   color: var(--label);
-  backdrop-filter: blur(30px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
   box-shadow:
     0 0 0 0.5px rgba(0, 0, 0, 0.22),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.1),
@@ -586,10 +718,11 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
 }
 
 .kterm[data-theme="light"] {
-  --win: rgba(255, 255, 255, 0.86);
+  --win: rgba(255, 255, 255, 0.92);
   --label: #1d1d1f;
-  --secondary: #6e6e73;
-  --tertiary: #aeaeb2;
+  --secondary: #5f5f64;
+  --tertiary: #6b6b70;
+  --accent: #3f6a7c;
   --separator: rgba(0, 0, 0, 0.07);
   --control: #d1d1d6;
   --hover: rgba(0, 0, 0, 0.05);
@@ -616,25 +749,43 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
   user-select: none;
 }
 
-.kterm-lights { display: inline-flex; gap: 8px; }
+/* Each dot is 12px, inside a transparent 24px touch target */
+.kterm-lights { display: inline-flex; margin-left: -6px; }
 .kterm-lights button {
   width: 12px;
   height: 12px;
+  box-sizing: content-box;
+  border: 6px solid transparent;
+  background-clip: padding-box;
   border-radius: 50%;
-  background: var(--control);
+  background-color: var(--control);
   color: transparent;
   font: 600 10px/12px -apple-system, BlinkMacSystemFont, sans-serif;
   text-align: center;
 }
+/* Coloured like a focused macOS window; the symbols appear on hover */
+.kterm-lights button:nth-child(1) { background-color: #ff5f57; }
+.kterm-lights button:nth-child(2) { background-color: #febc2e; }
+.kterm-lights button:nth-child(3) { background-color: #28c840; }
 .kterm-lights:hover button { color: rgba(0, 0, 0, 0.55); }
-.kterm-lights:hover button:nth-child(1) { background: #ff5f57; }
-.kterm-lights:hover button:nth-child(2) { background: #febc2e; }
-.kterm-lights:hover button:nth-child(3) { background: #28c840; }
 .kterm-bar { cursor: default; }
 @media (pointer: fine) {
   .kterm:not(.is-max) .kterm-bar { cursor: grab; }
   .kterm:not(.is-max) .kterm-bar:active { cursor: grabbing; }
 }
+
+.kterm-skip {
+  position: absolute;
+  top: -4rem;
+  left: 1rem;
+  z-index: 10;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  background: #1d1d1f;
+  color: #fff;
+  font-size: 14px;
+}
+.kterm-skip:focus { top: 1rem; }
 
 .kterm-title {
   position: absolute;
@@ -707,7 +858,7 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
 .kterm-body > .kterm-entry:first-child .kterm-cmd { margin-top: 0; }
 .kterm-body > [role="log"]:first-child > .kterm-entry:first-child .kterm-cmd { margin-top: 0; }
 .kterm-body > [role="log"]:first-child:empty + .kterm-input { margin-top: 0; }
-.kterm-prompt { color: var(--tertiary); white-space: nowrap; }
+.kterm-prompt { color: var(--accent); white-space: nowrap; }
 .kterm-dim { color: var(--secondary); }
 .kterm-b { color: var(--label); font-weight: 600; }
 .kterm-sub { color: var(--secondary); padding-left: 1.5rem; margin-bottom: 0.3rem; }
@@ -723,7 +874,7 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
 }
 .kterm-body a:hover { text-decoration-color: var(--label); }
 
-.kterm-hello { margin: 0.6rem 0 1.6rem; }
+.kterm-hello { margin: 0.6rem 0 1.1rem; }
 .kterm-name { margin: 0; font-size: 28px; font-weight: 600; line-height: 1.15; letter-spacing: -0.022em; }
 .kterm-tagline { margin: 0.45rem 0 0; font-size: 15px; line-height: 1.45; letter-spacing: -0.01em; color: var(--secondary); }
 .kterm-info { padding-top: 1.1rem; border-top: 0.5px solid var(--separator); }
@@ -731,16 +882,16 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
 
 .kterm-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.9rem; }
 .kterm-chip {
-  padding: 0 0.6rem;
+  padding: 0.1rem 0.65rem;
   border-radius: 6px;
   border: 0.5px solid var(--separator);
   background: var(--hover);
   color: var(--secondary);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 .kterm-chip:hover { color: var(--label); }
 
-.kterm-input { position: relative; margin-top: 1.6rem; word-break: break-all; white-space: pre-wrap; }
+.kterm-input { position: relative; margin-top: 1.2rem; word-break: break-all; white-space: pre-wrap; }
 .kterm-input input {
   position: absolute;
   inset: 0;
@@ -771,8 +922,12 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
 .kterm-ghost { color: var(--tertiary); }
 .kterm-mark { background: var(--sel); color: var(--label); border-radius: 2px; }
 
-.kterm-link { color: inherit; text-align: left; text-decoration: underline dotted; text-decoration-color: var(--tertiary); text-underline-offset: 3px; }
+.kterm-link { color: var(--link, var(--accent)); text-align: left; text-decoration: underline dotted; text-decoration-color: var(--tertiary); text-underline-offset: 3px; }
 .kterm-link:hover { color: var(--label); text-decoration-style: solid; }
+/* Taller hit area for touch (WCAG 2.2 target size) without moving the text */
+a.kterm-link { padding-block: 2px; }
+.kterm-hint { line-height: 2; }
+.kterm-hint a { display: inline-block; }
 
 .kterm-reveal { animation: ktermReveal 0.35s ease-out both; }
 @keyframes ktermReveal {
@@ -859,7 +1014,8 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
   --win: rgba(28, 24, 14, 0.96);
   --label: #ffd76a;
   --secondary: #e0c27a;
-  --tertiary: #9a7f3a;
+  --tertiary: #a3873d;
+  --accent: #fff1c2;
   --separator: rgba(255, 215, 106, 0.14);
   --control: #5a4a20;
   --hover: rgba(255, 215, 106, 0.08);
@@ -871,7 +1027,9 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
   --win: rgba(40, 42, 54, 0.96);
   --label: #f8f8f2;
   --secondary: #c3c6e0;
-  --tertiary: #6272a4;
+  --tertiary: #8f9bbe;
+  --accent: #50fa7b;
+  --link: #bd93f9;
   --separator: rgba(255, 255, 255, 0.08);
   --control: #44475a;
   --hover: rgba(255, 255, 255, 0.07);
@@ -883,9 +1041,11 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
   --win: rgba(0, 43, 54, 0.96);
   --label: #eee8d5;
   --secondary: #93a1a1;
-  --tertiary: #657b83;
+  --tertiary: #869aa2;
+  --accent: #8ca100;
+  --link: #2ca9a0;
   --separator: rgba(238, 232, 213, 0.1);
-  --control: #073642;
+  --control: #657b83;
   --hover: rgba(238, 232, 213, 0.07);
   --sel: rgba(42, 161, 152, 0.35);
   --pop-bg: rgba(7, 54, 66, 0.96);
@@ -895,7 +1055,8 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
   --win: rgba(0, 0, 0, 0.95);
   --label: #33ff66;
   --secondary: #22c552;
-  --tertiary: #15873a;
+  --tertiary: #168e3d;
+  --accent: #a8ffbf;
   --separator: rgba(51, 255, 102, 0.15);
   --control: #0f3d1c;
   --hover: rgba(51, 255, 102, 0.08);
@@ -918,7 +1079,9 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
     font-size: 12.5px;
   }
   .kterm-bar { height: 46px; }
-  .kterm-title { display: none; }
+  /* The name stays in the title bar on phones, so it's visible however far the boot scrolls */
+  .kterm-title { left: 5.5rem; transform: none; max-width: calc(100% - 13.75rem); font-size: 12px; }
+  .kterm-title-role { display: none; }
   .kterm-body { padding: 1.1rem 1.1rem 1.4rem; }
   .kterm-name { font-size: 26px; }
   .kterm-tagline { font-size: 14px; }
@@ -926,8 +1089,30 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
   .kterm-cols { gap: 0.2rem 1.4rem; }
 }
 
+/* Short laptop viewports (browser chrome eats ~110px): tighter type and a
+   taller window, so the whole boot screen fits without scrolling */
+@media (min-width: 901px) and (max-height: 820px) {
+  .kterm-page { padding-block: 2.25rem; }
+  .kterm { width: min(1040px, 100%, calc((100dvh - 4.5rem) * 1.6)); font-size: 12.5px; line-height: 1.5; }
+  .kterm-bar { height: 44px; }
+  .kterm-body { padding: 1.1rem 1.6rem 1.2rem; }
+  .kterm-name { font-size: 24px; }
+  .kterm-tagline { font-size: 14px; }
+  .kterm-hint { line-height: inherit; }
+  .kterm-kv { gap: 0 2rem; }
+}
+/* Very short windows (1280×600 and similar): trim spacing so the boot still fits */
+@media (min-width: 901px) and (max-height: 620px) {
+  .kterm-body { padding-block: 0.8rem 0.9rem; }
+  .kterm-hello { margin: 0.4rem 0 0.8rem; }
+}
+
+@media (max-width: 359px) {
+  .kterm-title { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .kterm-page::before, .kterm-input.focused .kterm-cursor, .kterm-cursor-on, .kterm-reveal,
+  .kterm-input.focused .kterm-cursor, .kterm-cursor-on, .kterm-reveal,
   .kterm-unlock, .kterm.is-party { animation: none; }
 }
 
@@ -935,3 +1120,7 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
 @media (pointer: coarse) {
   input, textarea, select { font-size: 16px !important; }
 }
+
+/* Leaflet's zoom buttons are white-only; match them to the dark map */
+.dark .leaflet-bar a { background: #1f2937; color: #e5e7eb; border-color: #374151; }
+.dark .leaflet-bar a:hover { background: #374151; }

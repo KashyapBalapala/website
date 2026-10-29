@@ -1,0 +1,91 @@
+---
+draft: true
+title: "Hybrid Retrieval for a Local Medical RAG"
+publishedAt: "2026-10-29"
+summary: "Why pure vector search wasn't enough for clinical PDFs, and the BM25 + vector + reciprocal rank fusion pipeline I built in its place."
+tags: ["AI", "RAG", "Backend"]
+---
+
+[Medical RAG Assistant](https://github.com/KashyapBalapala/medical-rag) answers questions about uploaded clinical-guideline PDFs. Everything runs locally: text is chunked with LangChain, embedded with `all-MiniLM-L6-v2`, stored in ChromaDB, and answered by a model running in Ollama. Every answer cites the chunks it came from.
+
+The first version used plain vector search: embed the question, take the nearest chunks, hand them to the model. It worked for simple questions and fell short on two kinds of question that matter in medicine.
+
+## Where vector search alone fell short
+
+**Exact terms.** Clinical text is full of drug names, dosages, abbreviations and numbers. A small embedding model maps "metformin 500 mg" close to other diabetes text in general, so the chunk with the exact dose doesn't always rank first. Keyword search finds that chunk straight away.
+
+**Broad questions.** "Explain diabetes" or "compare diabetes and hypertension" needs evidence from several documents and sections. Nearest-neighbour search tends to return several neighbouring chunks of the same page, because they are all similar to each other *and* to the question. The answer then reads as thorough while covering one source.
+
+So I added a hybrid retrieval path with two goals: find exact terms, and spread the evidence across sources.
+
+## The pipeline
+
+```
+question
+  → classify the question and plan queries
+  → for each query, in parallel: BM25 top 15 + vector top 15
+  → reciprocal rank fusion, merge across queries, keep top 40
+  → diversity selection down to 20
+  → weighted rerank down to the final set
+  → group by topic, compress, send to the model
+```
+
+### 1. Plan before searching
+
+Questions are sorted into five classes: direct question, research, comparison, exploratory, and follow-up. The class decides how many search queries to run and how many chunks to keep. "What are the symptoms of diabetes?" needs one or two queries and 4 final chunks. "Compare diabetes and hypertension" gets up to 12 queries and 12 chunks. A small question doesn't pay for a big search.
+
+### 2. Two searches per query
+
+Each planned query runs a BM25 keyword search and a vector search, 15 results each. BM25 catches exact terms; vectors catch paraphrase ("high blood sugar" and "hyperglycaemia").
+
+### 3. Reciprocal rank fusion
+
+BM25 scores and cosine similarities are on different scales, so adding them is meaningless. Reciprocal rank fusion only looks at rank:
+
+```ts
+const contribution = 1 / (k + hit.rank); // k = 60
+existing.rrfScore += contribution;
+```
+
+A chunk ranked high by both searches scores highest. A chunk ranked high by only one still survives. `k = 60` is the standard value; it stops the very top rank from drowning out everything else. After fusion, results from every query are merged and de-duplicated, and the top 40 go on.
+
+### 4. Diversity selection
+
+This step fixes the "five chunks from one page" problem, using three rules:
+
+- at most 3 chunks per document, preferring 2;
+- skip a chunk within 2 positions of one already picked from the same document, so neighbouring paragraphs don't crowd out other sections;
+- aim for at least 4 source documents when the library has them.
+
+That cuts the 40 down to 20.
+
+### 5. Rerank
+
+The final score blends the three signals, plus a bonus for adding new ground:
+
+```
+finalScore = 0.45 × RRF
+           + 0.25 × vector
+           + 0.15 × BM25
+           + 0.15 if first chunk from a new document
+           + 0.05 if first chunk from a new section
+```
+
+Each score is normalised first, so the weights mean what they say. The top 12 (or 4 for simple questions) go into the prompt.
+
+### 6. Say when retrieval is weak
+
+The step I'd keep in any RAG system: the pipeline flags `LOW_RETRIEVAL_CONFIDENCE` when the top score is under 0.55, fewer than 2 documents are covered, or fewer than 4 chunks survive. In a medical tool, "I couldn't find good evidence for this" is better than a confident answer built on one weak chunk.
+
+## Keeping it debuggable
+
+Every answer can show its working: the query plan, how many results each stage kept, latency per stage, and the confidence score. A debug view and an evaluation page make it possible to see *why* a chunk was chosen instead of guessing. Each stage also has its own test script (`test:planner`, `test:rrf`, `test:diversity`, `test:hybrid`), so the weights can be tuned without breaking the stages around them.
+
+Hybrid retrieval sits behind the `ENABLE_HYBRID_RETRIEVAL` flag, and every number above is configurable through environment variables.
+
+## What I'd take to the next RAG project
+
+- **Use both keyword and vector search.** BM25 is cheap and catches what small embedding models miss.
+- **Fuse by rank, not by score.** Different scoring scales don't add up; ranks do.
+- **Treat diversity as a goal.** Similarity alone keeps returning the same neighbourhood.
+- **Expose confidence.** A system that can say "not sure" is easier to trust.

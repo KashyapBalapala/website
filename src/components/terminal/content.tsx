@@ -63,21 +63,22 @@ export const OPEN_TO = "backend & AI engineering roles";
 
 export function Neofetch({ reveal = false }: { reveal?: boolean }) {
   const rows: [string, ReactNode][] = [
-    ["Origin", "Indian"],
     ["Location", DATA.location],
     ["Role", `${currentJob.title} @ ${currentJob.company}`],
     ["Prev", DATA.technicalExperience.slice(1).map((job) => job.company).join(", ")],
     ["Open to", OPEN_TO],
     ["Education", `${DATA.education[0].degree}, ${DATA.education[0].school}`],
     ["Cert", `${cert.degree.replace(/^Certification – /, "")}, ${cert.school}`],
-    ["Focus", "distributed systems, cloud integrations, applied AI"],
     ["Now", "going deep on applied AI: RAG, agents, LangGraph"],
     ["Stack", "TypeScript, Python, Node.js, Angular, React"],
-    ["Resume", <A key="r" href={LINKS.resume}>resume.pdf</A>],
-    ["Mail", <A key="m" href={`mailto:${DATA.contact.email}`}>{DATA.contact.email}</A>],
-    ["GitHub", <A key="g" href={LINKS.github}>{LINKS.github.replace("https://", "")}</A>],
-    ["LinkedIn", <A key="l" href={LINKS.linkedin}>linkedin.com/in/kashyap-balapala</A>],
-    ["Uptime", "3+ years shipping software"],
+    // One row of links keeps the banner short enough that the name stays on screen
+    [
+      "Links",
+      <span key="links">
+        <A href={LINKS.resume}>resume</A> · <A href={`mailto:${DATA.contact.email}`}>email</A> ·{" "}
+        <A href={LINKS.github}>github</A> · <A href={LINKS.linkedin}>linkedin</A>
+      </span>,
+    ],
   ];
   // Staggered fade-in for the boot sequence, merged with each element's own class
   const r = (i: number, className = "") =>
@@ -356,6 +357,8 @@ export const HELP: [string, string][] = [
   ["name · path · whoami", "tell me who you are"],
   ["feedback · guestbook", "rate the site, or leave a note"],
   ["theme [name]", "flip the lights, or pick: dark light dracula solarized matrix"],
+  ["feed · tank", "drop food for the fish, or check on the tank"],
+  ["aquarium off · on", "still the water, or let the fish swim again"],
   ["man <cmd>", "the manual for a command"],
   ["history", "commands you've run (ctrl+r searches)"],
   ["portfolio", "go to the full visual portfolio"],
@@ -372,6 +375,9 @@ export const MAN: Record<string, { usage: string; desc: string; examples?: strin
   contact: { usage: "contact", desc: "Email, GitHub, LinkedIn and resume." },
   msg: { usage: "msg <text>", desc: "Sends your note to my inbox. You'll be asked for an email so I can reply. Ctrl+C discards the draft.", examples: ["msg loved the RAG project, let's talk"] },
   copy: { usage: "copy email", desc: "Copies my email address to your clipboard." },
+  feed: { usage: "feed", desc: "Drops a few flakes into the tank behind the terminal; the nearest fish swim up to eat. Clicking open water drops food too." },
+  tank: { usage: "tank", desc: "How the tank is doing: fish, bubbles, meals eaten, how long it's been running, and whether it's moving." },
+  aquarium: { usage: "aquarium on | off", desc: "Turns the moving fish and bubbles on or off. The water stays either way, and the choice is remembered.", examples: ["aquarium off"] },
   github: { usage: "github", desc: "My most recently updated repos, fetched live from GitHub. Alias: stars." },
   blog: { usage: "blog", desc: "Lists my posts. Read one with cat.", examples: ["cat blog/<post>.md"] },
   time: { usage: "time", desc: "The current time in Hyderabad, so you know when to expect a reply." },

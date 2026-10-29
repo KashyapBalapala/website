@@ -12,12 +12,36 @@ import {
   type FsNode, type Out, type Post, type ThemeName,
 } from "./content";
 import { Game2048, Matrix, Snake, Stream, cowsay } from "./fx";
+import { Aquarium, type TankHandle } from "./aquarium";
 import { PERSONAS, PERSONA_KEYS, QUIZ, SNIPPETS, arrival, banner, greeting, matchJob, shuffle, typingScore, type Persona, type Question } from "./extras";
 
 const USER = "guest@kashyap";
 const EMAIL_PROMPT = "your email (so I can reply) ›";
 const BOOT_CMD = "screenfetch";
 const MSG_MAX = 2000;
+const FORM_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY ?? "";
+
+// Without the inbox form, hand the visitor a ready-to-send email instead
+const mailDraft = (subject: string, body: string) => (
+  <div className="kterm-sub">
+    <A href={`mailto:${DATA.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`}>open it as an email</A>{" "}
+    to {DATA.contact.email}, already written for you, or{" "}
+    <CopyDraft text={`To: ${DATA.contact.email}\nSubject: ${subject}\n\n${body}`} /> if no mail app opens.
+  </div>
+);
+
+// Keeps a command and its punctuation on one line when the hint wraps
+const Nowrap = ({ children }: { children: ReactNode }) => <span className="whitespace-nowrap">{children}</span>;
+
+// Desktops without a mail app ignore mailto links, so offer the text itself
+function CopyDraft({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button type="button" className="kterm-link" onClick={() => navigator.clipboard?.writeText(text).then(() => setCopied(true))}>
+      {copied ? "copied" : "copy it"}
+    </button>
+  );
+}
 const MSG_COOLDOWN = 30_000;
 const GITHUB_USER = LINKS.github.split("/").pop()!;
 const KEYS = {
@@ -32,6 +56,7 @@ const KEYS = {
   quizBest: "terminal-quiz-best",
   typingBest: "terminal-typing-best",
   github: "terminal-github",
+  aquarium: "terminal-aquarium",
 };
 
 const ALIASES: Record<string, string> = {
@@ -52,6 +77,7 @@ const VISIBLE = [
   ...Object.keys(SECTIONS), "neofetch", "help", "ls", "cd", "cat", "tree", "pwd", "open", "portfolio", "resume",
   "msg", "copy", "share", "github", "blog", "time", "theme", "man", "history", "secrets", "hint", "clear",
   "echo", "date", "uname", "uptime", "whoami", "match", "tour", "quiz", "typing", "banner", "name", "path", "feedback", "guestbook",
+  "feed", "tank", "aquarium",
 ];
 
 type Mode =
@@ -149,10 +175,16 @@ export function Terminal({ posts }: { posts: Post[] }) {
   const [revealed, setRevealed] = useState<Record<string, number[]>>({});
   const [party, setParty] = useState(false);
   const [persona, setPersona] = useState<Persona | null>(null);
+  // A persona from a previous visit is shown in the boot; one picked now prints below
+  const [returning, setReturning] = useState(false);
   const [visitorName, setVisitorName] = useState<string | null>(null);
   const [arrivalLine, setArrivalLine] = useState<string | null>(null);
   const [idleHint, setIdleHint] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [tankOn, setTankOn] = useState(true);
+  const tankRef = useRef<TankHandle>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuBtnRef = useRef<HTMLButtonElement>(null);
   const [focused, setFocused] = useState(false);
   const [win, setWin] = useState<Win>("normal");
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -180,6 +212,7 @@ export function Terminal({ posts }: { posts: Post[] }) {
   useEffect(() => {
     const savedTheme = load(KEYS.theme) as ThemeName | null;
     if (savedTheme && THEMES.includes(savedTheme)) setThemeState(savedTheme);
+    if (load(KEYS.aquarium) === "off") setTankOn(false);
     try {
       const saved = JSON.parse(load(KEYS.history) ?? "[]");
       if (Array.isArray(saved)) {
@@ -195,7 +228,10 @@ export function Terminal({ posts }: { posts: Post[] }) {
     save(KEYS.lastVisit, String(Date.now()));
 
     const savedPersona = load(KEYS.persona) as Persona | null;
-    if (savedPersona && PERSONA_KEYS.includes(savedPersona)) setPersona(savedPersona);
+    if (savedPersona && PERSONA_KEYS.includes(savedPersona)) {
+      setPersona(savedPersona);
+      setReturning(true);
+    }
     setVisitorName(load(KEYS.name));
     const params = new URLSearchParams(window.location.search);
     setArrivalLine(arrival(params.get("ref"), document.referrer));
@@ -219,7 +255,7 @@ export function Terminal({ posts }: { posts: Post[] }) {
       setAnimate(false);
       setBootTyped(BOOT_CMD);
     };
-    const t = setTimeout(() => setBootTyped(BOOT_CMD.slice(0, bootTyped.length + 1)), bootTyped ? 70 : 450);
+    const t = setTimeout(() => setBootTyped(BOOT_CMD.slice(0, bootTyped.length + 1)), bootTyped ? 40 : 250);
     window.addEventListener("keydown", skip);
     window.addEventListener("pointerdown", skip);
     return () => {
@@ -256,7 +292,21 @@ export function Terminal({ posts }: { posts: Post[] }) {
   useEffect(() => {
     if (!menuOpen) return;
     const close = () => setMenuOpen(false);
-    const onKey = (e: globalThis.KeyboardEvent) => e.key === "Escape" && close();
+    // Standard menu-button keys: focus starts on the first item, arrows move, Escape returns
+    const items = () => Array.from(menuRef.current?.querySelectorAll<HTMLElement>("[role=menuitem]") ?? []);
+    items()[0]?.focus();
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      const list = items(), i = list.indexOf(document.activeElement as HTMLElement);
+      if (e.key === "Escape") { close(); menuBtnRef.current?.focus(); }
+      else if (e.key === "Tab") close();
+      else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        list[(i + (e.key === "ArrowDown" ? 1 : list.length - 1)) % list.length]?.focus();
+      } else if (e.key === "Home" || e.key === "End") {
+        e.preventDefault();
+        list[e.key === "Home" ? 0 : list.length - 1]?.focus();
+      }
+    };
     document.addEventListener("click", close);
     document.addEventListener("keydown", onKey);
     return () => {
@@ -371,15 +421,28 @@ export function Terminal({ posts }: { posts: Post[] }) {
     return { lines: [`copied ${label} to your clipboard.`] };
   }
 
+  // Everything that reaches my inbox shares one length cap and cooldown
+  function sendLimit(cmd: string, text: string): Out | null {
+    if (text.length > MSG_MAX) return { lines: [`${cmd}: too long (${text.length}/${MSG_MAX} characters)`] };
+    const wait = MSG_COOLDOWN - (Date.now() - lastSent.current);
+    return wait > 0 ? { lines: [`${cmd}: easy there. try again in ${Math.ceil(wait / 1000)}s`] } : null;
+  }
+
   // Delivers a note to my inbox through Web3Forms; falls back to a mailto link
   async function sendForm(subject: string, fields: Record<string, string>, done: ReactNode) {
+    if (!FORM_KEY) {
+      print(<>{mailDraft(subject, fields.message ?? "")}</>);
+      return;
+    }
     print(<span className="kterm-dim">sending…</span>);
+    // Start the cooldown now, so repeats sent while this request is in flight are refused too
+    lastSent.current = Date.now();
     try {
       const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
-          access_key: process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY ?? "",
+          access_key: FORM_KEY,
           subject,
           ...(visitorName ? { name: visitorName } : {}),
           ...fields,
@@ -387,11 +450,10 @@ export function Terminal({ posts }: { posts: Post[] }) {
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.message);
-      lastSent.current = Date.now();
       print(done);
     } catch {
-      const href = `mailto:${DATA.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fields.message ?? "")}`;
-      print(<><div>could not send right now.</div><div className="kterm-sub"><A href={href}>open it in your mail client</A> instead</div></>);
+      lastSent.current = 0;
+      print(<><div>could not send right now.</div>{mailDraft(subject, fields.message ?? "")}</>);
     }
   }
 
@@ -630,11 +692,15 @@ export function Terminal({ posts }: { posts: Post[] }) {
       case "feedback": {
         const rating = Number(args[0]);
         if (!(rating >= 1 && rating <= 5)) return { lines: ["usage: feedback <1-5> [comment]", "e.g. feedback 5 the secrets hunt is great"] };
+        const limited = sendLimit(cmd, args.slice(1).join(" "));
+        if (limited) return limited;
         setTimeout(() => void sendForm(`Portfolio feedback: ${rating}/5`, { rating: String(rating), message: args.slice(1).join(" ") || "(no comment)" }, <span>thanks! {"★".repeat(rating)}{"☆".repeat(5 - rating)} sent.</span>), 0);
         return null;
       }
       case "guestbook": {
         if (!arg) return { lines: ["usage: guestbook <your message>", "entries go straight to my inbox. there's no public wall (yet)."] };
+        const limited = sendLimit(cmd, arg);
+        if (limited) return limited;
         setTimeout(() => void sendForm("Guestbook entry", { message: arg }, <span>signed. thanks for leaving a note{visitorName ? `, ${visitorName}` : ""}.</span>), 0);
         return null;
       }
@@ -700,9 +766,9 @@ export function Terminal({ posts }: { posts: Post[] }) {
       case "msg": {
         const body = raw.trim().replace(/^msg\s*/i, "");
         if (!body) return { node: <><div>usage: <B>msg</B> &lt;your message&gt;</div><div className="kterm-sub">e.g. msg loved the RAG project, let&apos;s talk</div></> };
-        if (body.length > MSG_MAX) return { lines: [`msg: too long (${body.length}/${MSG_MAX} characters)`] };
-        const wait = MSG_COOLDOWN - (Date.now() - lastSent.current);
-        if (wait > 0) return { lines: [`msg: easy there. try again in ${Math.ceil(wait / 1000)}s`] };
+        const limited = sendLimit(cmd, body);
+        if (limited) return limited;
+        if (!FORM_KEY) return { node: mailDraft("Hello from your portfolio", body) };
         setMode({ kind: "email", body });
         return { node: <span className="kterm-dim">draft: &quot;{body}&quot;</span> };
       }
@@ -885,6 +951,36 @@ export function Terminal({ posts }: { posts: Post[] }) {
         return { lines: [new Date().toString()] };
       case "uname":
         return { lines: ["KashyapOS 1.0 (Next.js 14) x86_64"] };
+      case "feed": {
+        if (!tankOn) return { lines: ["the fish are resting. 'aquarium on' wakes them up."], next: ["aquarium on"] };
+        const noticed = tankRef.current?.feed() ?? 0;
+        if (!noticed) return { lines: ["the fish are holding still right now (reduced motion is on, or the tank is still waking up)."] };
+        return { lines: [`sprinkled some food. ${noticed} fish noticed.`], next: ["tank"] };
+      }
+      case "tank": {
+        const t = tankRef.current?.stats();
+        if (!t) return { lines: ["the tank is still filling. try again in a second."] };
+        const mins = Math.floor(t.uptime / 60_000);
+        const states = { starting: "starting up", swimming: "swimming", paused: "paused (tab in the background)", still: "still (reduced motion)", off: "off" };
+        return {
+          lines: [
+            `fish        ${t.fish}`,
+            `bubbles     ${t.bubbles}`,
+            `meals       ${t.meals} flake${t.meals === 1 ? "" : "s"} eaten`,
+            `water       ${mins ? `${mins} min` : "under a minute"} since the tank filled`,
+            `theme       ${theme}`,
+            `state       ${states[t.state]}`,
+          ],
+          next: tankOn ? ["feed", "aquarium off"] : ["aquarium on"],
+        };
+      }
+      case "aquarium": {
+        if (args[0] !== "on" && args[0] !== "off") return { lines: [`aquarium is ${tankOn ? "on" : "off"}. usage: aquarium on | off`], next: ["tank"] };
+        const on = args[0] === "on";
+        setTankOn(on);
+        save(KEYS.aquarium, on ? "on" : "off");
+        return { lines: [on ? "aquarium on. the fish are back." : "aquarium off. the water stays, everything else holds still."] };
+      }
       case "uptime":
         return { lines: [`up ${Math.max(1, Math.round((Date.now() - bootedAt.current) / 60_000))} min, 1 user, load average: caffeinated`] };
       case "sudo":
@@ -965,8 +1061,13 @@ export function Terminal({ posts }: { posts: Post[] }) {
   }
 
   function run(raw: string) {
+    // Most visitors skip the name question and just type a command; treat
+    // that as a command (and stay "guest") rather than naming them "help"
+    const first = raw.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
+    const skipName = mode?.kind === "name" && (VISIBLE.includes(first) || first in ALIASES);
+    if (skipName) setMode(null);
     // Some modes take the next line as an answer instead of a command
-    if (mode?.kind === "quiz" || mode?.kind === "name" || mode?.kind === "typing") {
+    else if (mode?.kind === "quiz" || mode?.kind === "name" || mode?.kind === "typing") {
       if (mode.kind === "quiz") answerQuiz(raw);
       else if (mode.kind === "name") answerName(raw);
       else finishTyping(raw);
@@ -974,7 +1075,7 @@ export function Terminal({ posts }: { posts: Post[] }) {
       setCursorPos(0);
       return;
     }
-    if (mode && mode.kind !== "search" && mode.kind !== "tour") return;
+    if (mode && !skipName && mode.kind !== "search" && mode.kind !== "tour") return;
     const trimmed = raw.trim();
     commandCount.current += 1;
     if (commandCount.current === 8 && !load(KEYS.nudged)) {
@@ -1005,9 +1106,15 @@ export function Terminal({ posts }: { posts: Post[] }) {
   }
 
   // Clicked links and chips run a command, then hand the keyboard back to the prompt
+  // Clicking a button steals focus; hand it back so typing keeps working.
+  // Not on touch screens, where focusing would pop up the keyboard
+  function refocus() {
+    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) setTimeout(focusInput, 0);
+  }
+
   function runClicked(cmd: string) {
     run(cmd);
-    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) setTimeout(focusInput, 0);
+    refocus();
   }
 
   // Run a ?cmd= link once the boot finishes
@@ -1253,8 +1360,16 @@ export function Terminal({ posts }: { posts: Post[] }) {
     if (!d) return;
     const dx = e.clientX - d.px;
     const dy = e.clientY - d.py;
-    if (d.kind === "move") setOffset({ x: d.x + dx, y: d.y + dy });
-    else setSize({ w: Math.max(420, d.w + dx), h: Math.max(280, d.h + dy) });
+    if (d.kind === "move") {
+      setOffset({ x: d.x + dx, y: d.y + dy });
+      return;
+    }
+    // The window is centred, so it grows from the middle; shift it by half
+    // the growth to keep the top-left corner (and its buttons) where it was
+    const w = Math.max(420, d.w + dx);
+    const h = Math.max(280, d.h + dy);
+    setSize({ w, h });
+    setOffset({ x: d.x + (w - d.w) / 2, y: d.y + (h - d.h) / 2 });
   }
 
   const onPointerUp = () => (drag.current = null);
@@ -1262,11 +1377,13 @@ export function Terminal({ posts }: { posts: Post[] }) {
   function toggleMax() {
     setWin((w) => (w === "max" ? "normal" : "max"));
     setOffset({ x: 0, y: 0 });
+    refocus();
   }
 
   if (win === "closed") {
     return (
       <div className="kterm-page">
+        <Aquarium ref={tankRef} theme={theme} enabled={tankOn} golden={found.length === SECRETS.length} />
         <div className="kterm-closed sans">
           <p>Terminal closed.</p>
           <div>
@@ -1293,6 +1410,9 @@ export function Terminal({ posts }: { posts: Post[] }) {
   return (
     <RunContext.Provider value={runClicked}>
       <div className="kterm-page">
+        <Aquarium ref={tankRef} theme={theme} enabled={tankOn} golden={found.length === SECRETS.length} />
+        {/* First Tab stop: a way out for keyboard and screen-reader visitors */}
+        <nav aria-label="Skip link"><Link href="/portfolio" className="kterm-skip sans">Skip to the standard portfolio</Link></nav>
         <div
           ref={windowRef}
           className={`kterm${party ? " is-party" : ""}${win === "max" ? " is-max" : ""}${win === "min" ? " is-min" : ""}${size && win === "normal" ? " is-sized" : ""}`}
@@ -1311,19 +1431,20 @@ export function Terminal({ posts }: { posts: Post[] }) {
           >
             <span className="kterm-lights">
               <button type="button" aria-label="Close terminal" onClick={() => setWin("closed")}>×</button>
-              <button type="button" aria-label="Minimize terminal" onClick={() => setWin((w) => (w === "min" ? "normal" : "min"))}>−</button>
+              <button type="button" aria-label="Minimize terminal" onClick={() => { setWin((w) => (w === "min" ? "normal" : "min")); refocus(); }}>−</button>
               <button type="button" aria-label="Maximize terminal" onClick={toggleMax}>+</button>
             </span>
-            <h1 className="kterm-title sans">kashyap — -zsh</h1>
+            <h1 className="kterm-title sans">{DATA.name}<span className="kterm-title-role"> — Software Engineer</span></h1>
             <div className="kterm-actions sans">
               <Link href="/portfolio" className="kterm-btn">
                 Portfolio <ArrowRight className="size-3.5" />
               </Link>
               <button
+                ref={menuBtnRef}
                 type="button"
                 className="kterm-btn"
                 aria-label="Menu"
-                aria-haspopup="true"
+                aria-haspopup="menu"
                 aria-expanded={menuOpen}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1334,7 +1455,7 @@ export function Terminal({ posts }: { posts: Post[] }) {
               </button>
             </div>
             {menuOpen && (
-              <div className="kterm-menu sans" role="menu">
+              <div ref={menuRef} className="kterm-menu sans" role="menu" aria-label="Terminal menu">
                 <Link href="/portfolio" role="menuitem">Open full portfolio</Link>
                 <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); runClicked("theme"); }}>Toggle light / dark</button>
                 {THEMES.filter((t) => t !== "gold" || found.length === SECRETS.length).map((t) => (
@@ -1342,7 +1463,7 @@ export function Terminal({ posts }: { posts: Post[] }) {
                     {t === theme ? "✓ " : "   "}Theme: {t}
                   </button>
                 ))}
-                <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); clearScreen(); }}>Clear screen</button>
+                <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); clearScreen(); refocus(); }}>Clear screen</button>
                 <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); runClicked("help"); }}>Help</button>
               </div>
             )}
@@ -1366,20 +1487,17 @@ export function Terminal({ posts }: { posts: Post[] }) {
                   <>
                     <Neofetch reveal={animate} />
                     <div className={`mt-5${animate ? " kterm-reveal" : ""}`} style={animate ? { animationDelay: "800ms" } : undefined}>
-                      <div className="kterm-dim">{greeting(visitorName)}</div>
+                      {/* Kept to a few lines so the whole boot fits on screen without scrolling */}
+                      <div className="kterm-dim">
+                        {greeting(visitorName)}
+                        {welcome && ` welcome back, last visit ${welcome}.`}
+                        {welcome && found.length > 0 && found.length < SECRETS.length && ` ${found.length}/${SECRETS.length} secrets found.`}
+                      </div>
                       {arrivalLine && <div className="kterm-dim">{arrivalLine}</div>}
-                      {welcome && (
-                        <div className="kterm-dim">
-                          welcome back. last visit {welcome}.
-                          {found.length > 0 && found.length < SECRETS.length && ` you've found ${found.length}/${SECRETS.length} secrets so far, ${SECRETS.length - found.length} to go.`}
-                        </div>
-                      )}
-                      <div className="mt-2">this is a real terminal. it answers to things.</div>
-                      <div className="kterm-sub">start with <Cmd c="help" />, or go straight for <Cmd c="about" />, <Cmd c="projects" />, <Cmd c="hire" />.</div>
-                      <div className="kterm-sub">prefer clicking? <Link href="/portfolio">open the full portfolio</Link>.</div>
-                      <div className="kterm-sub">want to say something? <B>msg</B> &lt;anything&gt; — it lands in my inbox.</div>
-                      <div className="kterm-sub kterm-dim">(and yes, sudo works exactly as well as it does at home.)</div>
-                      {persona ? (
+                      <div className="mt-2 kterm-hint">
+                        this is a real terminal. try <Nowrap><Cmd c="help" />,</Nowrap> <Nowrap><Cmd c="about" />,</Nowrap> <Cmd c="projects" /> or <Nowrap><Cmd c="hire" />,</Nowrap> <B>msg</B> me anything, <Nowrap>or <Link href="/portfolio">open the full portfolio</Link>.</Nowrap>
+                      </div>
+                      {returning && persona ? (
                         <>
                           <div className="mt-2">{PERSONAS[persona].intro}</div>
                           <div className="kterm-chips">
@@ -1388,7 +1506,7 @@ export function Terminal({ posts }: { posts: Post[] }) {
                             ))}
                           </div>
                         </>
-                      ) : (
+                      ) : !persona && (
                         <>
                           <div className="mt-2 kterm-b">who&apos;s visiting?</div>
                           <div className="kterm-chips">
@@ -1397,7 +1515,7 @@ export function Terminal({ posts }: { posts: Post[] }) {
                                 {PERSONAS[k].label}
                               </button>
                             ))}
-                            <button type="button" className="kterm-chip" onClick={() => runClicked("tour")}>take the tour</button>
+                            <button type="button" className="kterm-chip kterm-chip-lg" onClick={() => runClicked("tour")}>take the tour</button>
                           </div>
                         </>
                       )}

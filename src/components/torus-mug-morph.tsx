@@ -221,7 +221,7 @@ export default function TorusMugMorph() {
         backdropFilter: "blur(12px)",
         border: "1px solid rgba(255,255,255,0.2)"
       }}>
-        <label style={{ fontWeight: 500, fontSize: 16, display: "block", textAlign: "center", color: "#374151" }}>
+        <label style={{ fontWeight: 500, fontSize: 16, display: "block", textAlign: "center", color: "hsl(var(--foreground))" }}>
           <div style={{ marginBottom: 8 }}>Morph: {morph.toFixed(2)}</div>
           <input
             type="range"
@@ -230,18 +230,9 @@ export default function TorusMugMorph() {
             step={0.01}
             value={morph}
             onChange={e => setMorph(Number(e.target.value))}
-            style={{ 
-              width: "100%", 
-              height: "8px", 
-              borderRadius: "4px", 
-              background: `linear-gradient(to right, #fbbf24 0%, ${lerpColor("#fbbf24", "#ffffff", 0.5).getHexString()} 50%, #ffffff 100%)`, 
-              outline: "none", 
-              cursor: "pointer",
-              WebkitAppearance: "none",
-              appearance: "none"
-            }}
+            style={{ width: "100%", cursor: "pointer", accentColor: "#6f97a8" }}
           />
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginTop: 8, color: "#6b7280" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginTop: 8, color: "hsl(var(--foreground) / 0.75)" }}>
             <span>Torus</span>
             <span>Mug</span>
           </div>

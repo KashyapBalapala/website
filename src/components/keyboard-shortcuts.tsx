@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
+import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 
 const SHORTCUTS = [
@@ -27,8 +28,11 @@ const SECTION_MAP: Record<string, string> = {
 export function KeyboardShortcuts() {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  const pathname = usePathname();
 
   useEffect(() => {
+    // The terminal home page has its own keys (games, themes, help)
+    if (pathname === "/") return;
     function onKeyDown(e: KeyboardEvent) {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
@@ -63,7 +67,7 @@ export function KeyboardShortcuts() {
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [theme, setTheme, pathname]);
 
   if (!open) return null;
 

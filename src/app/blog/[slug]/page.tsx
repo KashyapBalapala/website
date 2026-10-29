@@ -7,10 +7,18 @@ import { Suspense } from "react";
 
 export async function generateStaticParams() {
   const posts = await getBlogPosts();
+  // A static export needs at least one path; with no published posts this
+  // placeholder renders as a 404
   if (!posts || posts.length === 0) {
-    return [];
+    return [{ slug: "coming-soon" }];
   }
   return posts.map((post) => ({ slug: post.slug }));
+}
+
+// Drafts and unknown slugs 404 instead of rendering
+async function getPublishedPost(slug: string) {
+  const published = (await getBlogPosts()).some((post) => post.slug === slug);
+  return published ? getPost(slug) : null;
 }
 
 export async function generateMetadata({
@@ -20,7 +28,8 @@ export async function generateMetadata({
     slug: string;
   };
 }): Promise<Metadata | undefined> {
-  let post = await getPost(params.slug);
+  let post = await getPublishedPost(params.slug);
+  if (!post) return;
 
   let {
     title,
@@ -61,14 +70,14 @@ export default async function Blog({
     slug: string;
   };
 }) {
-  let post = await getPost(params.slug);
+  let post = await getPublishedPost(params.slug);
 
   if (!post) {
     notFound();
   }
 
   return (
-    <section id="blog" className="py-20">
+    <main id="blog" className="py-20">
       <script
         type="application/ld+json"
         suppressHydrationWarning
@@ -105,6 +114,6 @@ export default async function Blog({
         className="prose dark:prose-invert"
         dangerouslySetInnerHTML={{ __html: post.source }}
       ></article>
-    </section>
+    </main>
   );
 }

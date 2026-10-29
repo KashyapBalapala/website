@@ -7,11 +7,11 @@ function htmlToText(html: string) {
   return html
     .replace(/<\/(p|h[1-6]|li|pre|blockquote)>|<br\s*\/?>/g, "\n")
     .replace(/<[^>]+>/g, "")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#(x27|39);/g, "'")
+    .replace(/&(?:#x([\da-f]+)|#(\d+)|(amp|lt|gt|quot|apos|nbsp));/gi, (_, hex, dec, name) =>
+      hex ? String.fromCodePoint(parseInt(hex, 16))
+      : dec ? String.fromCodePoint(Number(dec))
+      : { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " }[name.toLowerCase() as "amp"]
+    )
     .replace(/\n{2,}/g, "\n")
     .trim();
 }

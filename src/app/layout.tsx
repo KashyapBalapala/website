@@ -74,7 +74,7 @@ const personJsonLd = {
   "@type": "Person",
   name: DATA.name,
   url: DATA.url,
-  jobTitle: "Full-Stack Developer",
+  jobTitle: "Software Engineer",
   worksFor: { "@type": "Organization", name: "Innovapptive" },
   sameAs: [
     DATA.contact.social.GitHub.url,
@@ -102,7 +102,7 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        <ThemeProvider attribute="class" defaultTheme="light">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TooltipProvider delayDuration={0}>
             <AmbientBackground />
             <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-container-padding">
