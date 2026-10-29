@@ -19,10 +19,10 @@ const PUPIL_COLOR = "#2b211d";
 export function Companion3D() {
   return (
     <div className="flex flex-col items-center w-full">
-      <h2 className="text-xl font-bold text-center mb-4 text-primary z-10 relative">
+      <h2 className="text-xl font-bold text-center mb-4 text-[#3f6a7c] dark:text-[#a7c8d4] z-10 relative">
         Say hi 👋
       </h2>
-      <div className="h-[45vh] w-full relative">
+      <div className="h-[45vh] min-h-[260px] w-full relative">
         <Canvas gl={{ antialias: true, alpha: true }}>
           <PerspectiveCamera makeDefault position={[0, 1.6, 6]} fov={45} />
           <ambientLight intensity={1.0} />

@@ -24,8 +24,8 @@ function ShowcaseCard({
     <div className="glass-card p-5 md:p-7 space-y-5">
       <div className="flex items-start gap-4">
         <span
-          className="shrink-0 flex items-center justify-center w-9 h-9 rounded-full text-sm font-bold"
-          style={{ background: "rgba(142,177,194,0.16)", color: "#5f8697" }}
+          className="shrink-0 flex items-center justify-center w-9 h-9 rounded-full text-sm font-bold text-[#3f6a7c] dark:text-[#a7c8d4]"
+          style={{ background: "rgba(142,177,194,0.16)" }}
         >
           {String(index).padStart(2, "0")}
         </span>
@@ -33,8 +33,8 @@ function ShowcaseCard({
           <div className="flex items-center gap-2 flex-wrap">
             <h2 className="text-lg font-bold leading-tight">{title}</h2>
             <span
-              className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
-              style={{ background: "rgba(142,177,194,0.12)", color: "#6f97a8" }}
+              className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full text-[#3f6a7c] dark:text-[#a7c8d4]"
+              style={{ background: "rgba(142,177,194,0.12)" }}
             >
               {tag}
             </span>
@@ -55,7 +55,7 @@ export default function ShowcasePage() {
           Showcase.
         </h1>
         <p className="text-muted-foreground text-lg max-w-md mx-auto">
-          Five small experiments — an algorithm, a simulation, a bit of
+          Four small experiments — an algorithm, a simulation, a bit of
           generative play.
         </p>
       </div>
@@ -91,7 +91,7 @@ export default function ShowcasePage() {
         index={4}
         title="A Little Companion"
         tag="Original 3D"
-        description="A character built entirely from primitive shapes in code — no external model file, nothing traced from an existing IP. Follows your cursor."
+        description="A character built entirely from primitive shapes in code — no external model file, nothing traced from an existing IP. Follows your cursor, or your finger on a phone."
       >
         <Companion3D />
       </ShowcaseCard>

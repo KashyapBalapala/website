@@ -334,9 +334,9 @@ export default function RubiksCube() {
     : null;
 
   return (
-    <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4">
+    <div className="flex flex-col items-center w-full max-w-4xl mx-auto sm:p-4">
       <div
-        className="relative w-full h-[500px] rounded-xl overflow-hidden shadow-2xl border border-gray-800"
+        className="relative w-full h-[clamp(300px,70svh,500px)] rounded-xl overflow-hidden shadow-2xl border border-gray-800"
         style={{ background: 'radial-gradient(circle at 50% 35%, #1c2b31 0%, #0c1315 75%)' }}
       >
         <Canvas key={key} camera={{ position: [6, 4, 6], fov: 45 }}>
@@ -390,24 +390,24 @@ export default function RubiksCube() {
         `}</style>
 
         {/* Controls */}
-        <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-3 pointer-events-none">
+        <div className="absolute bottom-6 left-0 right-0 px-3 flex flex-wrap justify-center gap-2 sm:gap-3 pointer-events-none">
           <button
             onClick={handleScramble}
             disabled={queue.length > 0}
-            className="pointer-events-auto px-6 py-3 bg-white/90 backdrop-blur-sm text-black rounded-full font-semibold shadow-lg hover:scale-105 transition-transform disabled:opacity-40 disabled:scale-100 active:scale-95 border border-black/5"
+            className="pointer-events-auto px-4 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base bg-white/90 backdrop-blur-sm text-black rounded-full font-semibold shadow-lg hover:scale-105 transition-transform disabled:opacity-40 disabled:scale-100 active:scale-95 border border-black/5"
           >
             Scramble
           </button>
           <button
             onClick={handleSolve}
             disabled={queue.length > 0 || history.length === 0}
-            className="pointer-events-auto px-6 py-3 bg-[#6f97a8] text-white rounded-full font-semibold shadow-lg hover:scale-105 hover:bg-[#5f8697] transition-all disabled:opacity-40 disabled:scale-100 active:scale-95"
+            className="pointer-events-auto px-4 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base bg-[#6f97a8] text-white rounded-full font-semibold shadow-lg hover:scale-105 hover:bg-[#5f8697] transition-all disabled:opacity-40 disabled:scale-100 active:scale-95"
           >
             Solve
           </button>
           <button
             onClick={handleReset}
-            className="pointer-events-auto px-6 py-3 bg-white/20 text-white border border-white/30 backdrop-blur-sm rounded-full font-semibold shadow-lg hover:scale-105 hover:bg-white/30 transition-all active:scale-95"
+            className="pointer-events-auto px-4 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base bg-white/20 text-white border border-white/30 backdrop-blur-sm rounded-full font-semibold shadow-lg hover:scale-105 hover:bg-white/30 transition-all active:scale-95"
           >
             Reset
           </button>
@@ -423,7 +423,7 @@ export default function RubiksCube() {
         </p>
         <div className="flex flex-wrap gap-1.5 font-mono text-xs max-h-24 overflow-y-auto">
           {queue.length === 0 ? (
-            <span className="italic text-muted-foreground opacity-50">queue empty</span>
+            <span className="italic text-muted-foreground">queue empty</span>
           ) : (
             queue.map((m, i) => (
               <span

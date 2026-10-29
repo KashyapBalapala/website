@@ -1,12 +1,13 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { Monitor } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 
-export function ModeToggle() {
+// forwardRef so the dock's Tooltip can attach to the button
+export const ModeToggle = forwardRef<HTMLButtonElement, ButtonProps>(function ModeToggle(props, ref) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -20,11 +21,17 @@ export function ModeToggle() {
 
   return (
     <Button
+      {...props}
+      ref={ref}
       variant="ghost"
       type="button"
       size="icon"
       className="px-2"
-      onClick={cycleTheme}
+      aria-label="Change theme"
+      onClick={(e) => {
+        props.onClick?.(e);
+        cycleTheme();
+      }}
     >
       {mounted && theme === "dark" ? (
         <MoonIcon className="h-[1.2rem] w-[1.2rem] text-neutral-800 dark:text-neutral-200" />
@@ -35,4 +42,4 @@ export function ModeToggle() {
       )}
     </Button>
   );
-}
+});

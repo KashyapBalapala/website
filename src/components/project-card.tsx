@@ -54,6 +54,7 @@ export function ProjectCard({
     >
       <Link
         href={href || "#"}
+        aria-label={title}
         className="block cursor-pointer"
       >
         {video && (
