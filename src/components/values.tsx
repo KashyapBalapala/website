@@ -32,6 +32,13 @@ export const Values = ({ delay = 0 }: ValuesProps) => {
     >
       <div className="flex flex-col items-center gap-3">
         <h2 className="text-2xl font-bold text-center">How I Work.</h2>
+        <p className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert leading-relaxed">
+          I start by understanding the problem before reaching for a
+          solution. Most bad code I&apos;ve written came from building the
+          thing I assumed was wanted rather than asking one more question
+          first. So I ask the question — even when it makes me look slower
+          in the first hour.
+        </p>
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground bg-white/50 dark:bg-white/10 hover:bg-white/70 dark:hover:bg-white/20 rounded-full transition-all duration-200 backdrop-blur-sm"
@@ -53,13 +60,6 @@ export const Values = ({ delay = 0 }: ValuesProps) => {
             className="overflow-hidden"
           >
             <div className="space-y-content-sm pt-2">
-              <p className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert leading-relaxed">
-                I start by understanding the problem before reaching for a
-                solution. Most bad code I&apos;ve written came from building the
-                thing I assumed was wanted rather than asking one more question
-                first. So I ask the question — even when it makes me look slower
-                in the first hour.
-              </p>
               <p className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert leading-relaxed">
                 I prefer the smallest change that actually solves the problem.
                 Clever abstractions written for a future that never arrives cost

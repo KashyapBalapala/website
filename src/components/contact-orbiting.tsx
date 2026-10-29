@@ -74,13 +74,7 @@ export const ContactOrbiting = ({ delay = 0 }: ContactOrbitingProps) => {
       className="w-full"
     >
       <div className="flex flex-col items-center text-center space-y-8">
-        {/* Header */}
-        <div className="space-y-3">
-          <h2 className="text-2xl font-bold">Get in Touch.</h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            Have a question or want to collaborate? I&apos;d love to hear from you.
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">Or reach me directly</p>
 
         {/* Beautiful teal-themed contact cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-2xl">

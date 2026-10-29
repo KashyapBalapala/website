@@ -118,6 +118,7 @@ function useGameKeys(active: boolean, onDir: (d: Dir) => void, onQuit: () => voi
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).closest?.("input, textarea")) return;
       const dir = KEY_DIR[e.key];
       if (dir) onDir(dir);
       else if (e.key === "q" || e.key === "Escape") onQuit();

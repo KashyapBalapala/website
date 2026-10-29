@@ -45,8 +45,6 @@ const CONTENT_LINKS: Array<{ source: string; target: string; reason: string }> =
   { source: "work", target: "tech-stack", reason: "technical skills, tools" },
   { source: "education", target: "projects", reason: "applied knowledge" },
   { source: "projects", target: "tech-stack", reason: "technologies used" },
-  { source: "projects", target: "github", reason: "open source contributions" },
-  { source: "tech-stack", target: "github", reason: "coding, open source" },
 
   // Location & personal cluster
   { source: "about", target: "hyderabad", reason: "hometown, local life" },
@@ -67,7 +65,7 @@ const CATEGORIES: Record<string, { name: string; sections: string[] }> = {
   },
   "professional": {
     name: "Professional",
-    sections: ["work", "education", "tech-stack", "github"],
+    sections: ["work", "education", "tech-stack"],
   },
   "projects": {
     name: "Projects",
@@ -100,7 +98,6 @@ const SECTIONS = [
   { id: "education", title: "Education", label: "education" },
   { id: "tech-stack", title: "Technical Skills", label: "tech stack" },
   { id: "projects", title: "Projects", label: "projects" },
-  { id: "github", title: "Open Source", label: "github" },
   { id: "books", title: "Commonplace Book", label: "books" },
   { id: "world", title: "World Map", label: "world" },
   { id: "hyderabad", title: "Hyderabad", label: "hyderabad" },
@@ -488,6 +485,12 @@ export function HomeGraph({ posts = [] }: HomeGraphProps) {
       .attr("dy", (d) => d.radius + 14);
 
     simulation.on("tick", () => {
+      // Keep every node and its label inside the card: clear of the hint
+      // text at the top and the blog toggle at the bottom
+      for (const d of nodes) {
+        d.x = Math.max(d.radius + 24, Math.min(width - d.radius - 24, d.x!));
+        d.y = Math.max(d.radius + 36, Math.min(height - d.radius - 44, d.y!));
+      }
       link
         .attr("x1", (d) => (d.source as GraphNode).x!)
         .attr("y1", (d) => (d.source as GraphNode).y!)

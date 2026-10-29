@@ -5,13 +5,16 @@ import { usePathname } from "next/navigation";
 
 const LABELS: Record<string, string> = {
   hero: "Top",
+  graph: "Site map",
   about: "About",
-  ethics: "Values",
+  ethics: "How I work",
   work: "Experience",
   education: "Education",
+  impact: "Impact",
   "tech-stack": "Skills",
+  "tech-flow": "Architecture",
   projects: "Projects",
-  github: "GitHub",
+  "showcase-teaser": "Showcase",
   beyond: "Beyond",
   books: "Reading",
   world: "World",
@@ -45,11 +48,12 @@ export function SectionIndicator() {
     return () => observer.disconnect();
   }, [pathname]);
 
-  if (pathname.replace(/\/$/, "") !== "/portfolio" || !active) return null;
+  const label = LABELS[active];
+  if (pathname.replace(/\/$/, "") !== "/portfolio" || !label) return null;
 
   return (
-    <p className="fixed bottom-20 inset-x-0 text-center text-[10px] text-muted-foreground/60 tracking-wide pointer-events-none z-30">
-      <span className="rounded-full bg-background/80 px-2 py-0.5 backdrop-blur-sm">{LABELS[active] ?? ""}</span>
+    <p aria-hidden className="hidden xl:block fixed bottom-6 left-6 text-[10px] text-muted-foreground/60 tracking-wide pointer-events-none z-30">
+      <span className="rounded-full bg-background/95 px-2 py-0.5 shadow-sm">{label}</span>
     </p>
   );
 }

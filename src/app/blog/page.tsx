@@ -81,7 +81,7 @@ export default async function BlogPage() {
   });
 
   return (
-    <section className="max-w-3xl mx-auto px-4 py-10 md:py-16 pb-28 md:pb-16">
+    <main className="max-w-3xl mx-auto px-4 py-10 md:py-16 pb-28 md:pb-16">
       <BlurFade delay={BLUR_FADE_DELAY}>
         <div className="mb-12">
           <h1 className="font-semibold text-2xl mb-1 tracking-tight">blog</h1>
@@ -175,43 +175,6 @@ export default async function BlogPage() {
         </BlurFade>
       )}
 
-      {/* JavaScript for filtering functionality */}
-      <script dangerouslySetInnerHTML={{
-        __html: `
-          document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('search-input');
-            const categoryFilter = document.getElementById('category-filter');
-            const postsContainer = document.getElementById('posts-container');
-            const posts = postsContainer.querySelectorAll('[data-category]');
-            
-            function filterPosts() {
-              const searchTerm = searchInput.value.toLowerCase();
-              const selectedCategory = categoryFilter.value;
-              
-              posts.forEach(post => {
-                const title = post.getAttribute('data-title') || '';
-                const summary = post.getAttribute('data-summary') || '';
-                const tags = post.getAttribute('data-tags') || '';
-                const category = post.getAttribute('data-category') || '';
-                
-                const matchesSearch = title.includes(searchTerm) || 
-                                    summary.includes(searchTerm) || 
-                                    tags.includes(searchTerm);
-                const matchesCategory = selectedCategory === 'all' || category === selectedCategory;
-                
-                if (matchesSearch && matchesCategory) {
-                  post.style.display = 'block';
-                } else {
-                  post.style.display = 'none';
-                }
-              });
-            }
-            
-            searchInput.addEventListener('input', filterPosts);
-            categoryFilter.addEventListener('change', filterPosts);
-          });
-        `
-      }} />
-    </section>
+    </main>
   );
 }

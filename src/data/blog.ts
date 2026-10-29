@@ -14,6 +14,8 @@ type Metadata = {
   summary: string;
   image?: string;
   tags?: string[];
+  // Drafts stay in content/ but are left off the site until they're ready
+  draft?: boolean;
 };
 
 function getMDXFiles(dir: string) {
@@ -78,5 +80,6 @@ async function getAllPosts(dir: string) {
 }
 
 export async function getBlogPosts() {
-  return getAllPosts(path.join(process.cwd(), "content"));
+  const posts = await getAllPosts(path.join(process.cwd(), "content"));
+  return posts.filter((post) => !(post.metadata as Metadata).draft);
 }

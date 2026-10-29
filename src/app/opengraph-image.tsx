@@ -42,7 +42,7 @@ export default function OGImage() {
             {DATA.name}
           </div>
           <div style={{ fontSize: 24, color: "rgba(248,250,252,0.6)", fontWeight: 400 }}>
-            Full-Stack Developer · SAP Integration · AI Systems
+            Software Engineer · SAP Integration · AI Systems
           </div>
           <div
             style={{

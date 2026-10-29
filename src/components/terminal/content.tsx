@@ -63,21 +63,22 @@ export const OPEN_TO = "backend & AI engineering roles";
 
 export function Neofetch({ reveal = false }: { reveal?: boolean }) {
   const rows: [string, ReactNode][] = [
-    ["Origin", "Indian"],
     ["Location", DATA.location],
     ["Role", `${currentJob.title} @ ${currentJob.company}`],
     ["Prev", DATA.technicalExperience.slice(1).map((job) => job.company).join(", ")],
     ["Open to", OPEN_TO],
     ["Education", `${DATA.education[0].degree}, ${DATA.education[0].school}`],
     ["Cert", `${cert.degree.replace(/^Certification – /, "")}, ${cert.school}`],
-    ["Focus", "distributed systems, cloud integrations, applied AI"],
     ["Now", "going deep on applied AI: RAG, agents, LangGraph"],
     ["Stack", "TypeScript, Python, Node.js, Angular, React"],
-    ["Resume", <A key="r" href={LINKS.resume}>resume.pdf</A>],
-    ["Mail", <A key="m" href={`mailto:${DATA.contact.email}`}>{DATA.contact.email}</A>],
-    ["GitHub", <A key="g" href={LINKS.github}>{LINKS.github.replace("https://", "")}</A>],
-    ["LinkedIn", <A key="l" href={LINKS.linkedin}>linkedin.com/in/kashyap-balapala</A>],
-    ["Uptime", "3+ years shipping software"],
+    // One row of links keeps the banner short enough that the name stays on screen
+    [
+      "Links",
+      <span key="links">
+        <A href={LINKS.resume}>resume</A> · <A href={`mailto:${DATA.contact.email}`}>email</A> ·{" "}
+        <A href={LINKS.github}>github</A> · <A href={LINKS.linkedin}>linkedin</A>
+      </span>,
+    ],
   ];
   // Staggered fade-in for the boot sequence, merged with each element's own class
   const r = (i: number, className = "") =>

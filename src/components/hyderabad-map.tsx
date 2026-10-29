@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
+import { useTheme } from "next-themes";
 import BlurFade from "./magicui/blur-fade";
 
 interface HyderabadMapProps {
@@ -109,8 +111,18 @@ const createMarkerIcon = (type: PlaceType) => {
   });
 };
 
+// Pins close enough to cover each other merge into one numbered bubble
+const createClusterIcon = (cluster: { getChildCount: () => number }) =>
+  new L.DivIcon({
+    html: `<div style="width:32px;height:32px;border-radius:50%;background:#4f7a8c;border:2px solid #fff;color:#fff;font:600 13px/28px system-ui,sans-serif;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.3)">${cluster.getChildCount()}</div>`,
+    className: "custom-marker",
+    iconSize: [32, 32],
+  });
+
 export const HyderabadMap = ({ delay = 0 }: HyderabadMapProps) => {
   const [isClient, setIsClient] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const shade = resolvedTheme === "dark" ? "Dark" : "Light";
 
   useEffect(() => {
     setIsClient(true);
@@ -152,20 +164,29 @@ export const HyderabadMap = ({ delay = 0 }: HyderabadMapProps) => {
               scrollWheelZoom={false}
             >
               <TileLayer
-                url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+                key={`base-${shade}`}
+                url={`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${shade}_Gray_Base/MapServer/tile/{z}/{y}/{x}`}
                 attribution="Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors"
                 maxNativeZoom={16}
                 maxZoom={18}
               />
               <TileLayer
-                url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
+                key={`ref-${shade}`}
+                url={`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${shade}_Gray_Reference/MapServer/tile/{z}/{y}/{x}`}
                 maxNativeZoom={16}
                 maxZoom={18}
               />
+              <MarkerClusterGroup
+                iconCreateFunction={createClusterIcon}
+                maxClusterRadius={60}
+                showCoverageOnHover={false}
+              >
               {Object.entries(locations).map(([key, location]) => (
                 <Marker
                   key={key}
                   position={location.coordinates}
+                  title={location.name}
+                  alt={location.name}
                   icon={createMarkerIcon(location.type)}
                 >
                   <Popup className="custom-popup">
@@ -174,6 +195,7 @@ export const HyderabadMap = ({ delay = 0 }: HyderabadMapProps) => {
                   </Popup>
                 </Marker>
               ))}
+              </MarkerClusterGroup>
             </MapContainer>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">

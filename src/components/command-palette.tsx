@@ -92,7 +92,7 @@ export function CommandPalette() {
   const navigate = useCallback(
     (href: string) => {
       runAction(() => {
-        if (href.startsWith("http") || href.startsWith("mailto:")) {
+        if (href.startsWith("http") || href.startsWith("mailto:") || href.endsWith(".pdf")) {
           window.open(href, "_blank", "noopener");
         } else {
           router.push(href);

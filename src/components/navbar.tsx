@@ -26,15 +26,16 @@ export default function Navbar() {
   if (pathname === "/") return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 mx-auto mb-4 flex origin-bottom h-full max-h-14">
+    <nav aria-label="Site" className="pointer-events-none fixed inset-x-0 bottom-0 z-30 mx-auto mb-4 flex origin-bottom h-full max-h-14">
       <div className="fixed bottom-0 inset-x-0 h-16 w-full bg-gradient-to-t from-background/80 to-transparent backdrop-blur-md"></div>
-      <Dock magnification={48} distance={100} className="glass-navbar z-50 pointer-events-auto relative mx-auto flex min-h-full h-full items-center px-1 sm:px-2 rounded-2xl transform-gpu">
+      <Dock magnification={48} distance={100} className="glass-navbar z-50 pointer-events-auto relative mx-auto flex min-h-full h-full items-center px-1 sm:px-2 rounded-2xl transform-gpu max-[359px]:scale-[0.88] origin-bottom">
         {DATA.navbar.map((item) => (
           <DockIcon key={item.href}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
                   href={item.href}
+                  aria-label={item.label}
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon" }),
                     "size-9 sm:size-12 rounded-xl hover:bg-white/50 dark:hover:bg-white/10 transition-all duration-200"
@@ -58,6 +59,7 @@ export default function Navbar() {
                 <TooltipTrigger asChild>
                   <Link
                     href={social.url}
+                    aria-label={name}
                     className={cn(
                       buttonVariants({ variant: "ghost", size: "icon" }),
                       "size-9 sm:size-12 rounded-xl hover:bg-white/50 dark:hover:bg-white/10 transition-all duration-200"
@@ -80,6 +82,7 @@ export default function Navbar() {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setIsAquariumActive(!isAquariumActive)}
+                aria-label={isAquariumActive ? "Hide aquarium" : "Show aquarium"}
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "icon" }),
                   "size-9 sm:size-12 rounded-xl transition-all duration-200",
@@ -110,6 +113,6 @@ export default function Navbar() {
 
       {/* Aquarium Component */}
       <Aquarium isActive={isAquariumActive} variant="viewport" />
-    </div>
+    </nav>
   );
 }

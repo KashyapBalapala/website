@@ -6,7 +6,6 @@ import { ChevronDown, BookOpen, Download, Footprints, UtensilsCrossed } from "lu
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 
-const GitHubContributions = dynamic(() => import("@/components/github-contributions").then(mod => mod.GitHubContributions), { ssr: false, loading: () => <Skeleton className="h-48 w-full" /> });
 const TechStack = dynamic(() => import("@/components/tech-stack").then(mod => mod.TechStack), { ssr: false, loading: () => <Skeleton className="h-40 w-full" /> });
 const TimelineItem = dynamic(() => import("@/components/resume-card").then(mod => mod.TimelineItem), { ssr: false });
 const ContactOrbiting = dynamic(() => import("@/components/contact-orbiting").then(mod => mod.ContactOrbiting), { ssr: false });
@@ -23,9 +22,6 @@ import BlurFade from "@/components/magicui/blur-fade";
 import BlurFadeText from "@/components/magicui/blur-fade-text";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DATA } from "@/data/resume";
-
-// TODO: replace with your real GitHub username to show live contribution data
-const GITHUB_USERNAME = "KashyapBalapala";
 
 const BLUR_FADE_DELAY = 0.04;
 
@@ -51,9 +47,13 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
     setExpandedBooks(prev => ({ ...prev, [theme]: !prev[theme] }));
   };
 
-  const allTechnologies = Array.from(
-    new Set(DATA.projects.flatMap((p) => p.technologies))
-  ).sort();
+  // Only offer filters that match more than one project; one-offs just add noise
+  const techCounts = DATA.projects
+    .flatMap((p) => p.technologies)
+    .reduce<Record<string, number>>((acc, t) => ({ ...acc, [t]: (acc[t] ?? 0) + 1 }), {});
+  const allTechnologies = Object.keys(techCounts)
+    .filter((t) => techCounts[t] > 1)
+    .sort();
   const filteredProjects = techFilter
     ? DATA.projects.filter((p) =>
         (p.technologies as readonly string[]).includes(techFilter)
@@ -104,7 +104,7 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
 
                 <BlurFade delay={BLUR_FADE_DELAY * 4}>
                   <p className="text-sm md:text-base text-muted-foreground/70 font-light tracking-wide">
-                    {DATA.name} · Full-Stack Developer
+                    {DATA.name} · Software Engineer
                   </p>
                 </BlurFade>
               </div>
@@ -392,13 +392,6 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
         </GlassCard>
       </section>
 
-      {/* GitHub Contributions Section */}
-      <section id="github">
-        <GlassCard className="p-4 md:p-6">
-          <GitHubContributions username={GITHUB_USERNAME} delay={0} />
-        </GlassCard>
-      </section>
-
       {/* Beyond the Code Section */}
       <section id="beyond">
         <GlassCard>
@@ -533,7 +526,7 @@ export default function HomeClient({ posts = [] }: HomeClientProps) {
                   Around Hyderabad.
                 </h2>
                 <p className="text-muted-foreground md:text-lg/relaxed max-w-md mx-auto">
-                  Some of the city&apos;s landmarks I call home.
+                  The places that make up my Hyderabad.
                 </p>
               </div>
             </div>

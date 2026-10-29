@@ -23,7 +23,7 @@ const METRICS: Metric[] = [
     label: "System Reliability",
     before: "< 90%",
     after: "95%+",
-    improvement: "+95%",
+    improvement: "95%+",
     icon: "🛡️",
   },
   {
@@ -114,11 +114,13 @@ export function ImpactMetrics() {
             <div className="text-xs text-muted-foreground font-medium">
               {metric.label}
             </div>
-            <div className="flex items-center justify-center gap-2 text-[10px] text-muted-foreground/60">
-              <span>{metric.before}</span>
-              <span>→</span>
-              <span className="text-primary/80">{metric.after}</span>
-            </div>
+            {metric.before !== "—" && (
+              <div className="flex flex-wrap items-center justify-center gap-x-1.5 text-[10px] text-muted-foreground/60">
+                <span>{metric.before}</span>
+                <span>→</span>
+                <span className="text-primary/80">{metric.after}</span>
+              </div>
+            )}
           </motion.div>
         ))}
       </div>

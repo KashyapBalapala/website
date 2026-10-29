@@ -75,7 +75,7 @@ export const TimelineItem = ({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="min-w-0 flex-1">
             <h3 className="font-semibold text-foreground text-sm leading-tight">
               {title}
